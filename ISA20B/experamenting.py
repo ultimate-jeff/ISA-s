@@ -1,0 +1,415 @@
+﻿import sys
+
+
+class Loger:
+    def __init__(self):
+        self.print_que = ""
+        self._errors = []
+        self._logs = []
+    def log(self,msg):
+        self._logs.append(msg+"\n")
+    def error(self,msg):
+        self._errors.append(msg+"\n")
+    def print_errors(self):
+        print("--------errors--------")
+        for msg in self._errors:
+            print(msg)
+    def print_log(self):
+        print("-------- logs --------")
+        for msg in self._logs:
+            print(msg)
+
+loger = Loger()
+reg_bit_size = 20
+reg_size = 2**reg_bit_size
+opcode_size = 5
+peramiter_size = 31
+op_map = [
+    [15],# 0
+    [15],# 1
+    [5,10],# 2
+    [5,10],# 3
+    [5,10],# 4
+    [5,5],# 5
+    [5,5],# 6
+    [5,5,5],# 7
+    [5,5,5],# 8
+    [5,5,5],# 9
+    [5,5,5],# 10
+    [5,5,5],# 11
+    [5,5,5],# 12
+    [5,5],# 13
+    [5,5,5],# 14
+    [15],# 15
+    [5,10],# 16
+    [15],# 17
+    [5,5,5],# 18
+    [5,10],# 19
+    [5,10],# 20
+    [5,5,5],# 21
+    [5,5,5],# 22
+    [5,5,5],# 23
+    [15],# 24
+    [15],# 25
+    [5,5,5],# 26
+    [5,5,5],# 27
+    [5,10],# 28
+    [5,5,5],# 29
+    [5,5,5],# 30
+    [5,5,5]# 31
+]
+opcode_map = {
+    "hult":0,# none
+    "stall":1,#none
+    "lr":2,# reg data
+    "push":3,# reg t_reg
+    "pull":4,#reg t_reg
+    "push_ptr":5,#reg_ptr,t_reg_ptr
+    "pull_ptr":6,#reg_ptr,t_reg_ptr
+    "add":7,# reg_a,reg_b,reg_c
+    "sub":8,# reg_a,reg_b,reg_c
+    "and":9,# reg_a,reg_b,reg_c
+    "nand":10,# reg_a,reg_b,reg_c
+    "or":11,# reg_a,reg_b,reg_c
+    "xor":12,# reg_a,reg_b,reg_c
+    "move":13,#reg_ptr,t_reg_ptr
+    "cmp":14,#reg ,flags,invert_mask
+    "jmp":15,#address
+    "jmp_ptr":16,#address_ptr
+    "null":17,#t_reg
+    "intrp":18,#t_reg,bottom_reg,top_reg
+    "adi":19,# reg,data
+    "sdi":20,# rag,data
+    "shift_u":21,#reg_a,reg_b,reg_c
+    "shift_d":22,#reg_a,reg_b,reg_c
+    "cstate":23,#core_id, value > 0 == start core & value = 0 == stop core
+    "call":24,# address
+    "ret":25,#none
+    "ld_ptr":26,#t_reg,reg
+    "ld_off_ptr":27,#offset_reg,ptr_reg,r/w/ff
+    "ld_off":28,#offset_reg,data
+    "soffmb":29,#offrf,core_id
+    "push_c":30,#reg,t_reg,core_id
+    "pull_c":31,#reg,t_reg,core_id
+    # sudo instructions
+    "data":0,
+    "int":0,
+    "interupt":18,
+    "rc":18,
+    "return":25,
+    "ldoff_ptr":27
+}
+flag_table = {
+    "==":[2,0],
+    "!=":[2,2],
+    "<":[4,0],
+    ">=":[4,4],
+    ">":[2+4,2+4],
+    "<=":[2+4,0]
+}
+
+class Util:
+    def __init__(self):
+        pass
+    def remove_coments(self,line,coment_char="#"):
+        output_line = ""
+        can_go = True
+        for char in line:
+            if char != coment_char and can_go:
+                output_line += char
+            else:
+                can_go = False
+        return output_line
+util = Util()
+       
+# "7 3 3 3" >> 343433434
+class Num_comp:
+    def __init__(self):
+        pass
+    def _cont_to_int(self,l_text,line_num):
+        l_int = []
+        for text in l_text:
+            try:
+                l_int.append(int(text))
+            except ValueError:
+                loger.error(f"syntax error : there was {text} when was expecting type(int) on line {line_num}")
+                l_int.append(0)
+        return l_int
+    def _compile_inst(self,text,split_text,line_num):
+        try:
+            opcode = int(split_text[0])
+            instruction = opcode
+            layout = op_map[opcode]
+            total_param_bits = sum(layout)
+            instruction <<= total_param_bits
+            current_shift = total_param_bits
+            perams = split_text[1:]
+        except ValueError:
+            loger.error(f"syntax error : invalid opcode {split_text[0]}")
+
+        for i in range(len(layout)):
+            size = layout[i] 
+            try:
+                val = perams[i]
+            except IndexError:
+                val = 0
+                loger.error(f"error instruction on line {line_num} >> {opcode_map[opcode]} : peramiters where not filled in (filling peramiters with 0)")
+
+            max_val = (1 << size) - 1
+            if val > max_val and opcode < peramiter_size:
+                loger.error(f"Error on line {line_num}: Parameter {i} for {opcode_map[opcode]} is {val}, which exceeds its {size}-bit limit (max {max_val}) : setting value to max")
+                val = max_val
+            current_shift -= size
+            instruction |= (val << current_shift)
+
+            if instruction > reg_size:
+                loger.error(f"error overflow on line {line_num}: instruction compiled over {reg_bit_size} bit limit")
+
+        return instruction
+    
+    def comp(self,text:str):
+        sltext = text.splitlines()
+        instrructions = []
+        t_inst = ""
+        line_num = -1
+        for line in sltext: # loops over every line
+            line_num += 1
+            split_text = line.split() # gets split text
+            try:
+                if len(split_text) <= 1:# manual load
+                    instrructions.append(int(split_text[0]))
+                else:
+                    instrructions.append(int(self._compile_inst(line,self._cont_to_int(split_text,line_num),line_num)))
+            except ValueError:
+                pass
+            except Exception as e:
+                print(e)
+            else:
+                pass
+        return instrructions
+
+class keyWord_handeler:
+    def __init__(self):
+        self.keywords = {
+            "!!":self._togle_running,
+            ">>":self._shift_program
+        }
+        self.keyword_type = {
+            "!!":"char",
+            ">>":"line"
+        }
+    def remove_keywords(self,line,keyword):
+        new_line = ""
+        keyword_type = self.keyword_type.get(keyword,None)
+        if keyword_type == "char":
+            new_line = line.replace(keyword,"")
+        elif keyword_type == "line":
+            new_line = "0\n"
+        else:
+            new_line = line
+        return new_line
+    def find_keyword(self,line,line_num):
+        for key in self.keywords:
+            if key in line:
+                return key
+        return None
+    def run_keyword(self,key,line,line_num,comp):
+        func = self.keywords.get(key,None)
+        if func != None:
+            line = func(line,line_num,comp)
+        return line
+
+    def _togle_running(self,line,line_num,comp):
+        comp.running = not comp.running
+        loger.log(f"toggled compalation to {comp.running} on line {line_num} (replacing with opcode 0 / hult)")
+        return "0\n"
+    def _shift_program(self,line,line_num,comp):
+        try:
+            shift_amount = line.split()[1]
+            shift_amount = int(shift_amount)
+        except ValueError:
+            loger.error(f"syntax error : invalid shift amount {shift_amount} on line {line_num} (filling shift amount with 0)")
+            shift_amount = 0
+        except IndexError:
+            loger.error(f"syntax error : no shift amount provided on line {line_num} (filling shift amount with 0)")
+            shift_amount = 0
+        comp.total_shift = shift_amount-1
+        return line
+
+class Char_comp:
+    def __init__(self):
+        self.init()
+        self.kwark = keyWord_handeler()
+        
+    def init(self):
+        self.running = True
+        self.total_shift = 0
+    def _apply_shift(self,line,line_num):
+        new_line = ""
+        if self.total_shift > 0:
+            new_line = "0\n" * self.total_shift
+            self.total_shift = 0
+            loger.log(f"applied program shift of {self.total_shift} on line {line_num}")
+            return new_line
+        else:
+            return new_line
+
+    def _decode_opcode(self,text,line_num,split_line):
+            opcode = opcode_map.get(split_line[0],None)
+            if opcode == None:
+                opcode = 0
+                loger.error(f"syntax error : invalid opcode {split_line[0]} on line {line_num} (replacing opcode with opcode {opcode})")
+            return opcode
+    def _main_comp(self,line,line_num):
+        line = util.remove_coments(line)
+        split_line = line.split()
+        opcode = None
+        if line == "":
+            loger.log(f"line {line_num} is empty (filling it with 0)")
+            split_line = ["0"]
+        elif not split_line[0].isdigit():
+            opcode = str(self._decode_opcode(line,line_num,split_line))
+            split_line[0] = opcode
+        else:
+            split_line = [split_line[0]]
+        return " ".join(split_line)+"\n"
+    
+    def comp(self,text:str):
+        self.init()
+        lines = text.splitlines()
+        instructions = ""
+        for line_num, line in enumerate(lines, start=1):
+            if self.running:
+                keyword = self.kwark.find_keyword(line,line_num)
+                if keyword:
+                    line = self.kwark.run_keyword(keyword,line,line_num,self)
+                    line = self.kwark.remove_keywords(line,keyword)
+                print(f"compiled line {line_num} : {line}")
+                instructions += self._main_comp(line,line_num)
+                instructions += self._apply_shift(line,line_num)
+        return instructions
+
+def flag_comp(text:"str"):
+    n_text = ""
+    for line in text.splitlines():
+        for k in flag_table.keys():
+            if k in line:
+                print(f"foud keyword {k}")
+                line = line.replace(k,f"{flag_table[k][0]} {flag_table[k][1]}")
+        n_text += line+"\n"
+    return n_text
+
+def ccomp(text):
+    global loger
+    num_comp = Num_comp()
+    char_comp = Char_comp()
+    n_text = flag_comp(text)
+    result = num_comp.comp(char_comp.comp(n_text))
+    text_out = ""
+    for line in result:
+        print(line)
+        text_out += str(line)+"\n"
+    print()
+    try:
+        with open("ISA20B/boot.txt","w") as f:
+            f.write(text_out)
+    except Exception as e:
+        print(f"error writing to file : {e}")
+    loger.print_errors()
+    loger.print_log()
+
+
+if __name__ == "__main__":
+    # Check if a file path was passed as an argument
+    if len(sys.argv) > 1:
+        file_to_open = sys.argv[1]
+        with open(file_to_open,"r") as f:
+            text = f.read()
+        ccomp(text)
+    else:
+        print("no script to compile")
+        data = input("enter dir of .txt assembly file :").lower()
+        if data == "y" or data == "":
+            print("compiling ISA20B/assem.txt \n\n\n")
+            with open("ISA20B/assem.txt","r") as f:
+                text = f.read()
+            ccomp(text)
+        else:
+            print(f"compiling {data} \n\n\n")
+            with open(data,"r") as f:
+                text = f.read()
+            ccomp(text)
+    input("press enter to continue :")
+else:
+    print("compiling ISA20B/assem.txt \n\n\n")
+    with open("ISA20B/assem.txt","r") as f:
+        text = f.read()
+    ccomp(text)
+
+# cd "ISA20B";./bios    
+# is != for loops
+"""
+flags; > flags are only set after an ALU op  and the output regester of the alu holds the flags
+    True :place_value(1) > this flag is alwase set to true
+    zerro :place_value(2)
+    carry :place_value(4)
+    overflow :place_value(8)
+    sine :place_value(16)
+data_reg_format;
+    00000(unalocated),00000(flags),0000000000(data)
+    > the top 5 bits are unalocated so if a data reg is exacuted then it interprets to a hult stoping the program befor anything unwanted can happpen
+    > the next 5 are the flags so each reg holds its own flags so its kindu like a history althow the flags get regenarated after every alu op
+
+
+G20 ISA;
+    opcode5bit : peramiters(bit_count).. > description/data
+    00:hult : None(15)
+    01:stall :none(15) > nop instruction
+    02:lr : reg(5),data(10) 
+    03:push : reg(5),addr(10)
+    04:pull :reg(5),addr(10)
+    05:push_ptr :reg(5),reg_ptr(5)
+    06:pull_ptr :reg(5),reg_ptr(5)
+    07:add : reg_a(5) ,reg_B(5) , out_reg(5)
+    08:sub : reg_a(5) ,reg_B(5) , out_reg(5)
+    09:and : reg_a(5) ,reg_B(5) , out_reg(5)
+    10:nand : reg_a(5) ,reg_B(5) , out_reg(5)
+    11:or : reg_a(5) ,reg_B(5) , out_reg(5)
+    12:xor : reg_a(5) ,reg_B(5) , out_reg(5)
+    13:move : reg_ptr(5),t_reg_ptr(5)
+    14:cmp : reg(5),flags(5),invert_mask(5)
+    15:jmp : addr(15)
+    16:jmp_ptr : addr_ptr(5)
+    17:null : None(15)
+    18:interupt / rc : core_id(5),addr_ptr(5) > rc stands for Romote Call so core 0 can foce core 3 to call a functions/addr
+    19:adi :reg(5),value(10)
+    20:sdi :reg(5),value(10)
+    21:shift_u :reg_a(5),reg_b(5),reg_c(5) > one of ther b or c regs os the amount i just forgot 
+    22:shift_d :reg_a(5),reg_b(5),reg_c(5) > one of ther b or c regs os the amount i just forgot 
+    23:cstate :core_id(5),state(5) > if state > 0 then the core is activated else it is disactivated
+    24:call :addr(15) > the address space is 12 bit so not the full 15 bit band width is used
+    25:ret :none(15) > returns to the address put on the call stack by the last call 
+    26:ld_ptr : t_reg(5),reg(5)
+    27:ldoff_ptr : offset_reg(5),ptr_reg(5)
+    28:ld_off : offset_reg(5),data(10)
+    29:soffmb : offmb(5),core_id(5)
+    30:push_c :reg(5),t_reg(5),core_id(5) < pushes data from curent core to a nuther core and same with pull_c
+    31:pull_c :reg(5),t_reg(5),core_id(5)
+
+offsets;
+> there are 8 offset memory banks and each bank has 32 offsets 
+> each core has an offset memory bank that it is curently using aka active bank
+> each core gets 4 offsets out of the 32 
+> offset 0 for the curent core gose to peramiter 1 and offset 1 gose to peramiter 2 and so on (excluding offset 3 bc that is unused / saved for later )
+> some peramiters dont acsept offsets but all reg(5) peramiters do and no data(10) peramiter take offsets and core_id peramiters dont and abs addr peramiter like addr(15) dont
+
+
+call_stack;
+>call sack has a reseion depth of 256
+
+memory_layout;
+> each core gets 2^12 general Von Numman regesters 
+> there is no stack but there are offsets
+> there is a dedicated port core
+
+"""   
