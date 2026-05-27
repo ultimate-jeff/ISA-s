@@ -1,0 +1,24 @@
+{
+    "data":{
+        "version":1.0,
+        "core_to_boot":0
+    },
+    "preload":{
+        "sf":{
+            "size":256,
+            "data":[1]
+        },
+        "regs":{
+            "size":4096,
+            "data":[0]
+        },
+        "stack":{
+            "size":4096,
+            "data":[0]
+        },
+        "cache":{
+            "size":4096,
+            "data":[0]
+        }
+    }    
+}

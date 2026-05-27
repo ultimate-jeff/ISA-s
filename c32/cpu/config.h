@@ -10,3 +10,4 @@
 #define STACK_SIZE 4096
 #define CACHE_SIZE 4096
 #define SF_SIZE 256
+#define CALL_STACK_SIZE 256
