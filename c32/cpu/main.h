@@ -329,6 +329,7 @@ class ALU {
 
 class Core {
     public:
+        uint32_t last_clk;
         unique_ptr<Memory_unit> mem;// = make_unique<Memory_unit>();
         ALU alu;
         Core* cores;
@@ -347,9 +348,14 @@ class Core {
         }
         void execute_normal(){
             Reg instruction = get_reg(get_sf(sf_map::clk).data);
+            last_clk = get_sf(sf_map::clk).data;
             uint32_t off1 = get_sf(sf_map::offset0).reg.data;
             uint32_t off2 = get_sf(sf_map::offset1).reg.data;
             uint32_t off3 = get_sf(sf_map::offset2).reg.data;
+
+            #if DEBUG == 1 or DEBUG == 2
+                cout << "core " << get_sf(sf_map::core_id).reg.data << " executing instruction with opcode " << instruction.opcode.opcode << " at clk " << get_sf(sf_map::clk).reg.data << endl;
+            #endif
 
             switch(instruction.opcode.opcode){
                 case 0:hult(instruction);break;
@@ -611,6 +617,11 @@ class Core {
                 default:
                     break;
             }
+            
+            if(get_sf(sf_map::clk).data == last_clk){ // if the instruction did not change the clk, increment it
+                set_sf(sf_map::clk, {last_clk + 1});
+            }
+
         }
         void execute_wfe(){
             if(!core_vars.wating_on_event){ // core's execute function should not be normal if wating on an event

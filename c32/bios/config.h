@@ -1,3 +1,3 @@
 
 
-#define BOOT_PATH "boot.json"
+#define BOOT_PATH "bios/boot.json"

@@ -10,7 +10,7 @@ class Core;
 
 json load_json(string path){
     ifstream file(path);
-    json data;
+    json data = json::object();
     if(!file.is_open()){
         cout << "failed to open file at path " << path << endl;
     }
@@ -30,14 +30,17 @@ class BIOS{
         BIOS(){
             boot_config = load_json(BOOT_PATH);
         }
-        void load_boot_config_to_core(Core* core){
-            load_memory(boot_config, core , &Core::set_reg, "regs");
-            load_memory(boot_config, core , &Core::set_stack, "stack");
-            load_memory(boot_config, core , &Core::set_sf, "sf");
-            load_memory(boot_config, core , &Core::set_cash, "cache");
+        template<typename T>
+        void load_boot_config_to_core(T* core){
+            cout << "loading boot config to core " << endl;
+            load_memory(boot_config, core, &T::set_reg, "regs");
+            load_memory(boot_config, core, &T::set_stack, "stack");
+            load_memory(boot_config, core, &T::set_sf, "sf");
+            load_memory(boot_config, core, &T::set_cash, "cache");
         }
     private:
-        void load_memory(json core_config, Core* core ,void(Core::*set_mem)(uint32_t addr, uint32_t value),string mem_name){
+        template<typename T>
+        void load_memory(json core_config, T* core ,void(T::*set_mem)(uint32_t addr, uint32_t value),string mem_name){
             for (int i = 0 ; i < core_config["preload"][mem_name]["data"].size() ; i++){
                 (core->*set_mem)(i, core_config["preload"][mem_name]["data"][i].get<uint32_t>());
             }
