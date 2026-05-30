@@ -2,10 +2,10 @@
     "data":{
         "version":1.0,
         "core_to_boot":0,
-        "boot_method":"binary"
+        "boot_method":"preload"
     },
     "binary":{
-        "binary_path":"C:\\Users\\matt\\.c\\proj1\\c32\\bios\\test_boot_files\\test.c32"
+        "binary_path":"jeff/boot.c32"
     },
     "preload":{
         "sf":{
