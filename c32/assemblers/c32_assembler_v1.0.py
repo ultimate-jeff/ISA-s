@@ -1,6 +1,7 @@
 import string
 import struct
 import random
+import re
 
 
 prin_RED = '\033[91m'
@@ -36,49 +37,8 @@ basic
 'aa'  ascii(97)  97
 
 """
-def write_c32_bin(path:"str",inst:"list",sinst:"list",cinst:"list"):
-    hs = 52
-    # each item is 4 bytes so multiply by 4
-    reg_start   = hs
-    stack_start = hs + len(inst) * 4
-    cache_start = hs + (len(inst) + len(sinst)) * 4
-    sf_start    = hs + (len(inst) + len(sinst) + len(cinst)) * 4
-    try:
-        print(f"writing file {path}")
-        with open(path, "wb") as f:
-            f.write(b'C32\x00')
-            f.write(struct.pack('<I', 1))    # version
-            f.write(struct.pack('<I', 0))    # secondary version
-            f.write(struct.pack('<I', 0))    # entry point
-            f.write(struct.pack('<II', reg_start,   len(inst)))
-            f.write(struct.pack('<II', stack_start, len(sinst)))
-            f.write(struct.pack('<II', cache_start, len(cinst)))
-            f.write(struct.pack('<II', sf_start,    255))
-            f.write(struct.pack('<I', 0))    # spacing
-            for i in inst:
-                f.write(struct.pack('<I', i)) 
-            for si in sinst:
-                f.write(struct.pack("<I",si))
-            for ci in cinst:
-                f.write(struct.pack("<I",ci))
-        print("done")
-    except Exception as e:
-        print(f"!!-error-!! : {e}")
 
-class Assembler():
-    error_msgs = ["-----ERROR (you're still a FAILURE 0~0)--{",
-        "i can smell the FAILURE!",
-        "MMM, Tastes like garbage","you call that code?",
-        "you sure you know how to code?","YOU HAVE BECOME YOUR FATHER",
-        "get that outa here! this ain't a DUMPSTER",
-        "it's no use, this is a lost cause (:"
-    ]
-    def __init__(self,text):
-        self.text = text
-        self.output = []
-        self.errors = []
-        self.logs = []
-        self.opcode_table = {
+opcode_table = {
     "hult": 0,
     "lr": 1,
     "move": 2,
@@ -230,6 +190,45 @@ class Assembler():
     "shift32_l_abs": 148,
     "shut_down": 149
 }
+        
+
+def write_c32_bin(path:"str",inst:"list",sinst:"list",cinst:"list"):
+    hs = 52
+    # each item is 4 bytes so multiply by 4
+    reg_start   = hs
+    stack_start = hs + len(inst) * 4
+    cache_start = hs + (len(inst) + len(sinst)) * 4
+    sf_start    = hs + (len(inst) + len(sinst) + len(cinst)) * 4
+    try:
+        print(f"writing file {path}")
+        with open(path, "wb") as f:
+            f.write(b'C32\x00')
+            f.write(struct.pack('<I', 1))    # version
+            f.write(struct.pack('<I', 0))    # secondary version
+            f.write(struct.pack('<I', 0))    # entry point
+            f.write(struct.pack('<II', reg_start,   len(inst)))
+            f.write(struct.pack('<II', stack_start, len(sinst)))
+            f.write(struct.pack('<II', cache_start, len(cinst)))
+            f.write(struct.pack('<II', sf_start,    255))
+            f.write(struct.pack('<I', 0))    # spacing
+            for i in inst:
+                f.write(struct.pack('<I', i)) 
+            for si in sinst:
+                f.write(struct.pack("<I",si))
+            for ci in cinst:
+                f.write(struct.pack("<I",ci))
+        print("done")
+    except Exception as e:
+        print(f"!!-error-!! : {e}")
+
+class Assembler():
+    error_msgs = ["-----ERROR (you're still a FAILURE 0~0)--{",
+        "i can smell the FAILURE!",
+        "MMM, Tastes like garbage","you call that code?",
+        "you sure you know how to code?","YOU HAVE BECOME YOUR FATHER",
+        "get that outa here! this ain't a DUMPSTER",
+        "it's no use, this is a lost cause (:"
+    ]
 
     def error(self,msg:"str",line_num:"int",e=None):
         if random.randint(0,100) > 10:
@@ -252,37 +251,72 @@ class Assembler():
         new_text = new_text.replace("#","")
         return new_text
     
-    def decode_peram(self,text:"str",line_num:"int"):
-        if text[0] == "\"":
-            data = ord(text[1])
-        elif text[0] == ";":
-            data = 0
-        else:
-            data = int(text)
-        return data
-
 
     def splitting_map_8_8_8(self,text:"list[str]",line_num:"int"):
         pass
 
-    def compile_line(self,line:"str",line_num:"str"):
-        text = line.split()
-        opcode = self.opcode_table.get(text[0],None)
-        if opcode == None:
-            self.error("invalid opcoed",line_num)
-            return "0"
-        
 
-    def compile(self):
-        self.text = self.remove_coments(self.text)
-        line_num = 0
-        for line in self.text.splitlines():
-            self.compile_line(line,line_num)
-            line_num += 1
+    def tokenize(self,text):
+        #tokens = re.split(r'[^a-zA-Z0-9_*;.]', text)
+        tokens = re.findall(r'"[^"]*"|\'[^\']*\'|[a-zA-Z0-9_*;.]+', text)
+        for t in range(len(tokens)):
+            if '' in tokens:
+                tokens.remove('')
+        return 
+    
+    def set_mu(self,line_num,line)
+    
+    def __init__(self,text):
+        self.text = text
+        self.output = []
+        self.errors = []
+        self.logs = []
+        self.lables = {}
+        self.regs = []
+        self.stack = []
+        self.cache = []
+        self.curent_mu
+        self.ops = {
+            0:{"reg":,
+               
+               },
+            1:{},
+            2:{}
+        }
+        self.mu_index = {
+            "regs":0,
+            "stack":None,
+            "cache":None
+        }
+            
 
 
-        
 
+text = """
+
+*regs
+
+*include
+lr 10 2
+lr2 22 5
+lr 'c' 3
+lr "j ssds" 5
+.lable
+"""
+a = Assembler("""
+
+*reg 
+*include "jeff.txt"
+
+lr 20 2
+lr2 300 2
+lr"jeff sads" 33
+.lable
+
+""")
+
+tokens = a.tokenize(a.text)
+print(tokens)
 
 
 #  add   r1 r2 r3 lkasdjk askdljlkdas
