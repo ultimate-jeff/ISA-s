@@ -1,6 +1,30 @@
 import string
 import struct
+import random
 
+
+prin_RED = '\033[91m'
+prin_GREEN = '\033[92m'
+prin_BLUE = '\033[94m'
+prin_RESET = '\033[0m'
+print_YELLOW = '\033[33m'
+print_MAGENTA = '\033[35m'
+print_CYAN = '\033[36m'
+prin_ORANGE = '\033[38;5;208m'
+prin_PINK = '\033[38;5;206m'
+prin_PURPLE = '\033[38;5;129m'
+prin_BROWN = '\033[38;5;94m'
+prin_GOLD = '\033[38;5;220m'
+prin_LIME = '\033[38;5;118m'
+prin_TEAL = '\033[38;5;30m'
+prin_NAVY = '\033[38;5;18m'
+prin_SKY_BLUE = '\033[38;5;117m'
+prin_HOT_PINK = '\033[38;5;198m'
+prin_MAROON = '\033[38;5;88m'
+prin_OLIVE = '\033[38;5;100m'
+prin_VIOLET = '\033[38;5;93m'
+prin_SALMON = '\033[38;5;209m'
+prin_DARK_GREEN = '\033[38;5;22m'
 # opcode perams  101010101001010101010
 
 """
@@ -12,10 +36,48 @@ basic
 'aa'  ascii(97)  97
 
 """
+def write_c32_bin(path:"str",inst:"list",sinst:"list",cinst:"list"):
+    hs = 52
+    # each item is 4 bytes so multiply by 4
+    reg_start   = hs
+    stack_start = hs + len(inst) * 4
+    cache_start = hs + (len(inst) + len(sinst)) * 4
+    sf_start    = hs + (len(inst) + len(sinst) + len(cinst)) * 4
+    try:
+        print(f"writing file {path}")
+        with open(path, "wb") as f:
+            f.write(b'C32\x00')
+            f.write(struct.pack('<I', 1))    # version
+            f.write(struct.pack('<I', 0))    # secondary version
+            f.write(struct.pack('<I', 0))    # entry point
+            f.write(struct.pack('<II', reg_start,   len(inst)))
+            f.write(struct.pack('<II', stack_start, len(sinst)))
+            f.write(struct.pack('<II', cache_start, len(cinst)))
+            f.write(struct.pack('<II', sf_start,    255))
+            f.write(struct.pack('<I', 0))    # spacing
+            for i in inst:
+                f.write(struct.pack('<I', i)) 
+            for si in sinst:
+                f.write(struct.pack("<I",si))
+            for ci in cinst:
+                f.write(struct.pack("<I",ci))
+        print("done")
+    except Exception as e:
+        print(f"!!-error-!! : {e}")
 
 class Assembler():
+    error_msgs = ["-----ERROR (you're still a FAILURE 0~0)--{",
+        "i can smell the FAILURE!",
+        "MMM, Tastes like garbage","you call that code?",
+        "you sure you know how to code?","YOU HAVE BECOME YOUR FATHER",
+        "get that outa here! this ain't a DUMPSTER",
+        "it's no use, this is a lost cause (:"
+    ]
     def __init__(self,text):
         self.text = text
+        self.output = []
+        self.errors = []
+        self.logs = []
         self.opcode_table = {
     "hult": 0,
     "lr": 1,
@@ -169,6 +231,15 @@ class Assembler():
     "shut_down": 149
 }
 
+    def error(self,msg:"str",line_num:"int",e=None):
+        if random.randint(0,100) > 10:
+            self.errors.append(f"{prin_RED}{random.choice(Assembler.error_msgs)}{prin_RESET}")
+        if e != None:
+            self.errors.append(f"{prin_RED}!!-error-!! : {msg} : at line {line_num}{prin_RESET}")
+        else:
+            self.errors.append(f"{prin_RED}!!-error-!! : {msg} : at line {line_num} with python error of {e}{prin_RESET}")
+    def log(self,msg:"str",line_num:"int"):
+        self.logs.append(f"{prin_ORANGE}loged : {msg} on line {line_num}{prin_RESET}")
 
     def remove_coments(self,text:str):
         new_text = ""
@@ -180,49 +251,76 @@ class Assembler():
                 new_text += char
         new_text = new_text.replace("#","")
         return new_text
-    def remove_coments2(self,text:str):
-        for char in text:
-            cut = False
-            if char == "#" or cut == True:
-                cut = True
-                text = text[:char] + text[char+1:]
+    
+    def decode_peram(self,text:"str",line_num:"int"):
+        if text[0] == "\"":
+            data = ord(text[1])
+        elif text[0] == ";":
+            data = 0
+        else:
+            data = int(text)
+        return data
+
+
+    def splitting_map_8_8_8(self,text:"list[str]",line_num:"int"):
+        pass
+
+    def compile_line(self,line:"str",line_num:"str"):
+        text = line.split()
+        opcode = self.opcode_table.get(text[0],None)
+        if opcode == None:
+            self.error("invalid opcoed",line_num)
+            return "0"
+        
 
     def compile(self):
-        self.text = self.remove_coments2(self.text)
+        self.text = self.remove_coments(self.text)
+        line_num = 0
+        for line in self.text.splitlines():
+            self.compile_line(line,line_num)
+            line_num += 1
+
+
+        
 
 
 
-def write_c32_bin(path:"str",inst:"list",sinst:"list",cinst:"list"):
-    hs = 52
-    # each item is 4 bytes so multiply by 4
-    reg_start   = hs
-    stack_start = hs + len(inst) * 4
-    cache_start = hs + (len(inst) + len(sinst)) * 4
-    sf_start    = hs + (len(inst) + len(sinst) + len(cinst)) * 4
-    try:
-        print(f"writing file {path}")
-        with open(path, "wb") as f:
-            f.write(b'C32\x00')
-            f.write(struct.pack('<I', 1))    # version
-            f.write(struct.pack('<I', 0))    # secondary version
-            f.write(struct.pack('<I', 0))    # entry point
-            f.write(struct.pack('<II', reg_start,   len(inst)))
-            f.write(struct.pack('<II', stack_start, len(sinst)))
-            f.write(struct.pack('<II', cache_start, len(cinst)))
-            f.write(struct.pack('<II', sf_start,    255))
-            f.write(struct.pack('<I', 0))    # spacing
-            for i in inst:
-                f.write(struct.pack('<I', i)) 
-            for si in sinst:
-                f.write(struct.pack("<I",si))
-            for ci in cinst:
-                f.write(struct.pack("<I",ci))
-        print("done")
-    except Exception as e:
-        print(f"!!-error-!! : {e}")
+#  add   r1 r2 r3 lkasdjk askdljlkdas
+# ["add" ,"r1" , "r2" , "r3" , "lkasdjk" , "askdljlkdas"]
+
+# opcode,perms
+# 8_8_8
+# 8_16
+# 16_8
 
 
-a = Assembler()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
