@@ -288,28 +288,28 @@ class ALU {
     inline 
     uint8_t gen_flags_16(uint32_t result,uint32_t ra ,uint32_t rb){
         uint8_t flags = (
-            (1u) | 
-            ((result == 0) << 1) |
-            ((result > 0xFFFF) << 2) |
-            (((~(ra ^ rb) & (ra ^ result) & 0x8000) != 0) << 3)|
-            ((result >> 15) << 4) | 
-            ((~result & 1) << 5) |
+            (1u) | // true
+            ((result == 0) << 1) | // zero
+            ((result > 0xFFFF) << 2) | // carry
+            (((~(ra ^ rb) & (ra ^ result) & 0x8000) != 0) << 3)| // overflow
+            ((result >> 15) << 4) | // sign
+            ((~result & 1) << 5) | //even
             (0u << 6) | // 16bit flag
-            (ra == rb) << 7
+            (ra == rb) << 7 // == / equal to
         );
         return flags;
     }
     inline
     uint8_t gen_flags_32(uint32_t result, uint32_t ra, uint32_t rb) {
         return (
-            (1u)                                               |
-            ((result == 0) << 1)|
-            ((result < ra) << 2)|  // carry - if result wrapped around it will be smaller than input
-            (((~(ra ^ rb) & (ra ^ result) & 0x80000000) != 0) << 3)|
-            ((result >> 31) << 4)|
-            ((~result & 1) << 5) |
+            (1u) | // true
+            ((result == 0) << 1)| // zero
+            ((result < ra) << 2)|  // carry
+            (((~(ra ^ rb) & (ra ^ result) & 0x80000000) != 0) << 3)| // overflow
+            ((result >> 31) << 4)| // sign
+            ((~result & 1) << 5) | // even
             (1u << 6) |  // 32bit flag
-            (ra == rb) << 7
+            (ra == rb) << 7 // == 
         );
     }
     inline

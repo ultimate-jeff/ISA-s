@@ -1,0 +1,8 @@
+*reg
+add 3 4 3
+lr 55
+# askjhdjhas #
+*stop
+le 3 3
+lr 33 3
+*end

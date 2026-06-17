@@ -1,0 +1,9 @@
+*reg
+
+add 3 4 3
+lr 55
+# askjhdjhas #
+*import "C:/Users/matt/.c/proj1/c32/assemblers/dave.txt" r
+*stop
+le 3 3 
+lr 33 3
