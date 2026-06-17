@@ -1,5 +1,8 @@
-lr 'Z' 10
+lr 50 64
+lr 51 1
 .start
-sdi 'Z' 1
-cmp 'Z' !=
-jmp .start
+sdi 50 1
+cmp_or 50 163 0
+dump_reg 50
+dump_sf 3 ;
+jmpu .start

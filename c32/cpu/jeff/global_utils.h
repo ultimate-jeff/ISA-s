@@ -30,6 +30,7 @@ namespace Util{
         cout << print_que << endl;
     }
     inline void dump_reg_data(Reg r,uint32_t addr){
+        /*
         print(
             "reg["  + to_string(addr) + "] "
             " int=" + to_string(r.reg.data)               +
@@ -39,6 +40,9 @@ namespace Util{
             " flg=" + to_string(r.reg.flags)               +  // flags byte
             " meta="+ to_string(r.reg.meta_data)              // metadata
         );
+        */
+       cout << "reg " << addr << " has " << r.reg.data << " and flags of " << r.reg.flags << endl;
+       //print("reg " + to_string(addr) + " has " + to_string(r.reg.data) + " and flags of " + to_string(r.reg.flags));
     }
 
 };

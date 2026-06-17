@@ -38,10 +38,10 @@ int start_cpu(T *timer){
             if(cores[i].get_sf(sf_map::active).reg.data){
                 active_cores++;
                 (cores[i].*execute_fn)();
-                #if DEBUG >= 4
-                    cout << "core " << i << " was clocked " << endl;
-                #endif
             }
+        }
+        if(loops % PREINT_FREQUANCY == 0){
+            Util::cout_print_que();
         }
         total_core_cycles += active_cores;
         if(active_cores == 0){

@@ -5,6 +5,7 @@ import re
 import typer
 import sys
 import json
+from functools import wraps
 
 
 prin_RED = '\033[91m'
@@ -55,7 +56,7 @@ prin_colors = (
     prin_DARK_GREEN, # 21
 )
 
-key_chars = ["*",".",";","%"]
+key_chars = ["*","."]
 commands = {
     "*!":0,
     "*stop":0,
@@ -67,8 +68,6 @@ commands = {
     ".":5,
     "*r":6
 }
-
-
 
 comparison_ops = {
     "==": {"flg": 128, "im": 0,   "op": "-", "cmp": "cmp"}, # == set        -> a == b
@@ -253,6 +252,7 @@ opcode_sm_table = {}
 for k in opcode_table.keys():
     opcode_sm_table[opcode_table[k]["value"]] = opcode_table[k]["sm"]
 
+
 def write_c32_bin(path:"str",inst:"list",sinst:"list",cinst:"list"):
     hs = 52
     # each item is 4 bytes so multiply by 4
@@ -317,7 +317,8 @@ def write_c32_json(path:"str",inst:"list",sinst:"list",cints:"list"):
     except Exception as e:
         print(f"!!-error-!! : {e}")
 
-class Assembler():
+
+class Assembler:
     error_msgs = ["-----ERROR (you're still a FAILURE 0~0)--{",
         "i can smell the FAILURE!",
         "MMM, Tastes like garbage","you call that code?",
@@ -325,7 +326,6 @@ class Assembler():
         "get that outa here! this ain't a DUMPSTER",
         "it's no use, this is a lost cause (:"
     ]
-
     def error(self,msg:"str",line_num:"int",e=None):
         if random.randint(0,100) > 10:
             self.errors.append(f"{prin_RED}{random.choice(Assembler.error_msgs)}{prin_RESET}")
@@ -347,83 +347,30 @@ class Assembler():
         print()
         print("compalation complete")
 
-    def clamp(self,line_num,value,limit,msg=1):
+    def open_file(self,path,ln=None):
+        data = ""
+        try:
+            with open(path,"r") as f:
+                data = f.read()
+        except Exception as e:
+            self.error("faled to open path : {path} ",ln,e)
+        return data
+    def loop_over_lines(func):
+        def wrapper(self,text:"str"):
+            data = []
+            splitline = text.splitlines()
+            for i in range(len(splitline)):
+                line = splitline[i]
+            data.append(func(self,line))
+            return data
+        return wrapper
+    
+    def clamp(self,value,limit):
         if value > limit:
-            self.error(f"parameter {msg} is greater than the opcode's splitting map permits ({limit}), snapping to max value", line_num)
             return limit
         return value
-    def map_8_8_8(self, tokens: list, ln):
-        suppressed = ";" in tokens
-        params = [t for t in tokens if t != ";"]
-        expected = 4  # opcode + 3 params, change per map
-        if len(params) < expected and not suppressed:
-            self.log(f"parameters missing (888): filling with 0", ln)
-        opcode = params[0] if len(params) > 0 else 0
-        p1 = params[1] if len(params) > 1 else 0
-        p2 = params[2] if len(params) > 2 else 0
-        p3 = params[3] if len(params) > 3 else 0
-
-        opcode = self.clamp(ln,opcode,255)
-        p1 = self.clamp(ln,p1,255,1)
-        p2 = self.clamp(ln,p2,255,2)
-        p3 = self.clamp(ln,p3,255,3)
-        value = (opcode << 24) | (p1 << 16) | (p2 << 8) | p3
-        return value
-    def map_8_16(self,tokens:"list[int,str]",ln):
-        suppressed = ";" in tokens
-        params = [t for t in tokens if t != ";"]
-        expected = 3
-        if len(params) < expected and not suppressed:
-            self.log(f"parameters missing (888): filling with 0", ln)
-        opcode = params[0] if len(params) > 0 else 0
-        p1 = params[1] if len(params) > 1 else 0
-        p2 = params[2] if len(params) > 2 else 0
-
-        opcode = self.clamp(ln,opcode,255)
-        p1 = self.clamp(ln,p1,255,1)
-        p2 = self.clamp(ln,p2,(2**16)-1,2)
-        value = (opcode << 24) | (p1 << 16) | p2
-        return value
-    def map_16_8(self,tokens:"list[int,str]",ln):
-        suppressed = ";" in tokens
-        params = [t for t in tokens if t != ";"]
-        expected = 3
-        if len(params) < expected and not suppressed:
-            self.log(f"parameters missing (888): filling with 0", ln)
-        opcode = params[0] if len(params) > 0 else 0
-        p1 = params[1] if len(params) > 1 else 0
-        p2 = params[2] if len(params) > 2 else 0
-
-        opcode = self.clamp(ln,opcode,255)
-        p2 = self.clamp(ln,p2,255,2)
-        p1 = self.clamp(ln,p1,(2**16)-1,1)
-        value = (opcode << 24) | (p2 << 16) | p1
-        return value
-    def map32(self,tokens:"list[list[int,str]]",ln):
-        p1 = self.clamp(ln,tokens[0],(2**32)-1)
-        return p1
-
-    def splitting_map(self,tokens:"list[list[int,str]]"):
-        new_tokens = []
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            opcode = line_token[0]
-            split_map = opcode_sm_table.get(opcode)
-            if split_map == 888:
-                curent_SM = self.map_8_8_8
-            elif split_map == 816:
-                curent_SM = self.map_8_16
-            elif split_map == 168:
-                curent_SM = self.map_16_8
-            elif split_map == None:
-                curent_SM = self.map32
-            else:
-                self.error(f"invalid splitting map {split_map} , falling back to defalt of 888","compiler error on like ~ 360 in function : splitting_map")
-                curent_SM = self.map_8_8_8
-            new_tokens.append(curent_SM(line_token,i))
-        return new_tokens
-
-    def tokenize_line(self,text):
+    
+    def _tokenize_line(self,text):
         #tokens = re.findall(r'"[^"]*"|\'[^\']*\'|[a-zA-Z0-9_*.!=<>]+', text)
         tokens = re.findall(r'"[^"]*"|\'[^\']*\'|[a-zA-Z0-9_*.!=<>%]+|\S', text)
         for t in range(len(tokens)):
@@ -434,10 +381,10 @@ class Assembler():
         out = []
         splitline = text.splitlines()
         for line in splitline:
-            line_token = self.tokenize_line(line)
+            line_token = self._tokenize_line(line)
             if line_token != []:
                 out.append(line_token)
-        return out     
+        return out   
     def remove_coments(self,text:str):
         new_text = ""
         removing = False
@@ -451,240 +398,69 @@ class Assembler():
                 self.log("un closed comment","idk but you should be able to figure it out",4)
         new_text = new_text.replace("#","")
         return new_text
-    def _fill_in_opcode(self,line_token,line_num):
-        op = line_token[0]
-        if op[0] in key_chars:
-            return line_token
-        opcode = opcode_table.get(op)["value"]
-        if opcode == None:
-            opcode = 0
-            self.error(f"invalid opcode {op} , replacing with hult",line_num)
-        line_token[0] = opcode
-        return line_token   
-    def fill_in_opcodes(self,tokens:"list[list[str]]"):
-        for i in range(len(tokens)):
-            tokens[i] = self._fill_in_opcode(tokens[i],i)
-        return tokens
-    def init_text(self,text:"str"):
-        text.lower()
-        return text
-    def appy_comparison_ops(self,tokens:"list[list[str,int]]"):
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            for j in range(len(line_token)):
-                elm = line_token[j]
-                comp_op = comparison_ops.get(elm)
-                if comp_op != None: # im stands for invert mask and invert mask are applied before the comparison 
-                    line_token[j:j+1] = [comp_op["flg"], comp_op["im"]]
-        return tokens            
-    def section_data(self,tokens:"list[list[str,int]]"): # this is in charge of the *! and *stop commands
-        new_tokens = []
-        adding = True
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            command = commands.get(line_token[0])
-            if command == 0:
-                #adding = not adding
-                break
-            if adding and command != 0:
-                new_tokens.append(line_token)
-        return new_tokens
-    def create_lables(self,tokens:"list[list[str,int]]"):
-        new_tokens = []
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            elm = line_token[0]
-            if type(elm) == str and commands.get(elm[0]) == 5:
-                self.lables[line_token[0]] = i
-                new_tokens.append([61])
-            else:
-                new_tokens.append(line_token)
-        return new_tokens
-    def apply_lables(self,tokens:"list[list[str,int]]"):
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            for j in range(len(line_token)):
-                elm = line_token[j]
-                if type(elm) == str and commands.get(elm[0]) == 5:
-                    tokens[i][j] = self.lables.get(elm)
-        return tokens
-    def _include_file(self,perams:"list[str]",line_num):
-        new_line_token = [[0]]  # i was working on includs
-        try:
-            perm1 = perams[1] == "r"
-        except IndexError:
-            perm1 = "r"
-        if perm1:
-            with open(perams[0].replace("\"",""),"r") as f:
-                text = f.read()
-                new_line_token = self.phase1(text)
-        else:
-            self.error(f"faled to include {perams[0].replace("\"","")} , try doing : *include \"{perams[0].replace("\"","")}\" r ",line_num)
-        return new_line_token
     def merge_tokens(self, tokens_a: "list[list[str,int]]", index: "int", tokens_b: "list[list[str,int]]"):
         tokens_a[index:index+1] = tokens_b
         return tokens_a
-    def handle_includes(self,tokens:"list[list[str,int]]"):
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            if commands.get(line_token[0]) == 4:
-                perams = line_token.copy()
-                perams.pop(0)
-                new_tokens = self._include_file(perams,i)
-                self.merge_tokens(tokens,i,new_tokens)
-        return tokens
-    def string_eval(self,tokens:list[list[str,int]]):
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            for j in range(len(line_token)):
-                elm = line_token[j]
-                try:
-                    if type(elm) == str and ("\'" in elm):
-                        tokens[i][j] = ord(elm[1])
-                    elif type(elm) == str and ("\"" in elm):
-                        value = 0
-                        for char in elm[1:-1]:
-                            value += ord(char)
-                        tokens[i][j] = value
-                except IndexError:
-                    tokens[i][j] = 0
-                    self.error(f"quotes not closed",i,IndexError)
-        return tokens
-    def apply_reg_preloading(self,tokens:"list[list[str,int]]"):
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            op = line_token[0]
-            if commands.get(op) == 6:
-                try:
-                    if int(line_token[1]) < 2**32:
-                        value = int(line_token[1])
-                except ValueError:
-                    self.log("command *r was given a str instead of an int , using ascii sum of the str",i,4)
-                    value = 0
-                    for char in line_token[1]:
-                        value += ord(char)
-                except IndexError:
-                    self.error("command *r peramiters not fillid in , filling in wiht 0",i,IndexError)
-                    value = 0
-                if value < (2**32)-1:
-                    tokens[i] = [value]
+    def detect_stops(self,text):
+        new_text = ""
+        adding = True
+        splitline = text.splitlines()
+        for i in range(len(splitline)):
+            line = splitline[i]
+            line_token = self._tokenize_line(line)
+            if line_token != [] and commands.get(line_token[0]) == commands["*!"]:
+                adding = not adding
+            elif adding:
+                new_text += line+"\n"
+        return new_text
+    def handle_includes(self,tokens:"list[list[str]]"):
+        for li in range(len(tokens)):
+            line_token = tokens[li]
+            if commands.get(line_token[0]) == commands["*include"]:
+                if len(line_token) >= 2:
+                    path = line_token[1].replace("\"","")
+                    data = self.open_file(path,li)
+                    data = self.phase1(data)
+                    tokens = self.merge_tokens(tokens,li,data)
                 else:
-                    self.log(f"command *r value {value} exceeds 32bit range, clamping to max", i, 4)
-                    tokens[i] = [2**32 - 1]
+                    self.error(f"faled to find {line_token[0]} path",li)
+                    tokens.pop(li)
         return tokens
-    def separate_MU(self,tokens:"list[list[str,int]]"):
-        curent_mu = "*reg"
-        build = {"*reg":[],"*stack":[],"*cache":[]}
-        build_keys = build.keys()
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            op = line_token[0]
-            if type(op) == str and op in build_keys:
-                curent_mu = op
-            if line_token[0] not in build_keys:
-                build[curent_mu].append(line_token)
-        return build
-    def convert_to_int(self,tokens:"list[list[str,int]]"):
-        for i in range(len(tokens)):
-            line_token = tokens[i]
-            for j in range(len(line_token)):
-                elm = line_token[j]
-                if type(elm) == str:
-                    contains_key = False
-                    for k in key_chars:
-                        if k in elm:
-                            contains_key = True
-                    if not contains_key:
-                        tokens[i][j] = int(elm)
-        return tokens
+
 
     def phase1(self,text):
-        text = self.init_text(text)
         text = self.remove_coments(text)
+        text = self.detect_stops(text)
         tokens = self.tokenize(text)
-        tokens = self.section_data(tokens)
         tokens = self.handle_includes(tokens)
         return tokens
-    def phase2(self,tokens:"list[list[str,int]]"):
-        tokens = self.create_lables(tokens)
-        tokens = self.apply_lables(tokens)
-        return tokens
-    def phase3(self,tokens):
-        tokens = self.string_eval(tokens)
-        tokens = self.apply_reg_preloading(tokens)
-        tokens = self.convert_to_int(tokens)
-        build = self.separate_MU(tokens)
-        for k in build.keys():
-            build[k] = self.splitting_map(build[k])
-
-        return build
-           
     def compile(self,text):
         tokens = self.phase1(text)
-        tokens = self.fill_in_opcodes(tokens)
-        tokens = self.appy_comparison_ops(tokens)
-        tokens = self.phase2(tokens)
-        build = self.phase3(tokens)
-        return build
-    
+
+        return tokens
     def __init__(self):
-        self.output = []
+        self.lables = {}
         self.errors = []
         self.logs = []
-        self.lables = {}
-            
-
-assembler = Assembler()
-app = typer.Typer()
-
-def compile(input_path,output_path,flags="f"):
-    flags.lower()
-    print(f"started compiling {input_path} to {output_path}")
-    try:
-        with open(input_path,"r") as f:
-            text = f.read()
-        output_data = assembler.compile(text)
-        assembler.print_data()
-        if "p" in flags:
-            print("preload")
-            print("regs:")
-            for instruction in output_data["*reg"]:
-                print(instruction)
-            print("stack:")
-            for instruction in output_data["*stack"]:
-                print(instruction)
-            print("cache")
-            for instruction in output_data["*cache"]:
-                print(instruction)
-        if "b" in flags:
-            write_c32_bin(output_path,output_data["*reg"],output_data["*stack"],output_data["*cache"])
-        if "j" in flags:
-            # write json
-            write_c32_json(output_path,output_data["*reg"],output_data["*stack"],output_data["*cache"])
-    except Exception as e:
-        print(f"compiler error during compile {e}")
-    
-
-@app.command()
-def comp(input_path:str , output_path:str,flags:str="wp"):
-    compile(input_path,output_path,flags)
-@app.command()
-def version():
-    print("c32 v1.0.0")
-
-print("----- c32 assembler v1.0 -----")
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        app()  # CLI mode: c32 cli-compile jeff.txt out.c32
-    else:
-        print("c32 v1.0.0 compiler")
-        path = input("enter path u want to compile :")
-        output_path = input("enter output_path :")
-        compile(path, output_path)
 
 
-#   python c32_assembler_v1.0.py comp jeff.txt out.c32 --flags= j,b,p
-#
-#
-#  python c32_assembler_v1.0.py comp jeff.txt C:\Users\matt\.c\proj1\c32\bios\boot.json --flags=jp
-#
+text = """
+
+*reg
+
+lr 'Z' 5;
+.start
+add 2 3 'Z'
+cmp 'Z' !=
+jmp .start
+
+
+"""
+
+a = Assembler()
+out = a.compile(text)
+a.print_data()
+print()
+for line in out:
+    print(line)
+print()

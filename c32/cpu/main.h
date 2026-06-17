@@ -248,24 +248,36 @@ class ALU {
             a.reg.flags ^= invert_mask; // invert flags according to instruction
             Reg sf_do_jmp;
             sf_do_jmp.reg.data = ((a.reg.flags & flags) == flags); // mask out unneeded flags
+            #if DEBUG >= 5
+                cout << "alu do_jmp flags set to " << sf_do_jmp.reg.data << " with flags of " << (int)flags << " and reg flags of " << a.reg.flags << endl;
+            #endif
             return sf_do_jmp;
         }
         inline Reg cmp_or(Reg a , uint8_t flags , uint8_t invert_mask){
             a.reg.flags ^= invert_mask; // invert flags according to instruction
             Reg sf_do_jmp;
             sf_do_jmp.reg.data = ((a.reg.flags & flags) != 0); // mask out unneeded flags
+            #if DEBUG >= 5
+                cout << "alu do_jmp flags set to " << sf_do_jmp.reg.data << " with flags of " << (int)flags << " and reg flags of " << a.reg.flags << endl;
+            #endif
             return sf_do_jmp;
         }
         inline Reg cmp_and(Reg a , uint8_t flags , uint8_t invert_mask){
             a.reg.flags ^= invert_mask; // invert flags according to instruction
             Reg sf_do_jmp;
             sf_do_jmp.reg.data = (a.reg.flags == flags); // mask out unneeded flags
+            #if DEBUG >= 5
+                cout << "alu do_jmp flags set to " << sf_do_jmp.reg.data << " with flags of " << (int)flags << " and reg flags of " << a.reg.flags <<  endl;
+            #endif
             return sf_do_jmp;
         }
         inline Reg cmp_reg (Reg a, uint8_t flags , uint8_t invert_mask){
             a.bits_16_8.p2 ^= invert_mask; // invert flags according to instruction
             Reg sf_do_jmp;
             sf_do_jmp.reg.data = ((a.bits_16_8.p2 & flags) == flags); // mask out unneeded flags
+            #if DEBUG >= 5
+                cout << "alu do_jmp flags set to " << sf_do_jmp.reg.data << "with flags of" << flags << " and reg flags of " << a.reg.flags ;
+            #endif
             return sf_do_jmp;
         }
         
@@ -278,6 +290,9 @@ class ALU {
     void alu_complete16(Reg *result , Reg a, Reg b){
         result->reg.flags = gen_flags_16(result->reg.data, a.reg.data, b.reg.data);
         result->reg.meta_data = a.reg.meta_data;
+        #if DEBUG >= 5
+            cout << "set flags of a reg with " << result->reg.flags <<endl;
+        #endif
         //return result;
     }
     inline 
@@ -1202,16 +1217,24 @@ class Core {
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
         void dump_reg(Reg instruction , uint32_t off1){
-            Util::dump_reg_data(get_reg(instruction.bits_8_16.p1+off1),instruction.bits_8_16.p1+off1);
+            uint32_t addr = instruction.bits_8_16.p1+off1;
+            cout << "reg " << addr << " has " << get_reg(addr).reg.data << endl;
+            //Util::dump_reg_data(get_reg(instruction.bits_8_16.p1+off1),instruction.bits_8_16.p1+off1);
         }
-        void dump_sf(Reg instruction){
-            Util::dump_reg_data(get_sf(instruction.bits_8_16.p1),instruction.bits_8_16.p1);
+        void dump_sf(Reg instruction){   
+            uint32_t addr = instruction.bits_8_16.p1;
+            cout << "sf " << addr << " has " << get_sf(addr).reg.data << endl;
+            //Util::dump_reg_data(get_sf(instruction.bits_8_16.p1),instruction.bits_8_16.p1);
         }
         void dump_cache(Reg instruction , uint32_t off1){
-            Util::dump_reg_data(get_cash(instruction.bits_8_16.p1+off1),instruction.bits_8_16.p1+off1);
+            uint32_t addr = instruction.bits_8_16.p1+off1;
+            cout << "cache " << addr << " has " << get_cash(addr).reg.data << endl;
+            //Util::dump_reg_data(get_cash(instruction.bits_8_16.p1+off1),instruction.bits_8_16.p1+off1);
         }
         void dump_stack(Reg instruction,uint32_t off1){
-            Util::dump_reg_data(get_stack(instruction.bits_8_16.p1+off1),instruction.bits_8_16.p1+off1);
+            uint32_t addr = instruction.bits_8_16.p1+off1;
+            cout << "stack " << addr << " has " << get_stack(addr).reg.data << endl;
+            //Util::dump_reg_data(get_stack(instruction.bits_8_16.p1+off1),instruction.bits_8_16.p1+off1);
         }
         void int_sqrt(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2,(uint32_t)sqrt(get_reg(instruction.bits_8_8_8.p1+off1).fdata));
