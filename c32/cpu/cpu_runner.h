@@ -20,18 +20,27 @@ int start_cpu(T *timer){
     uint64_t total_core_cycles = 0;
     int loops = 0;
 
-    #if DEBUG == 2 or DEBUG == 3
+    #if DEBUG >= 2
         timer->start_time();
+    #endif
+    #if DEBUG >= 4
+        cout << "starting state : Util::cpu_on: " << Util::cpu_on << endl;
     #endif
 
     while (Util::cpu_on){
         ++loops;
         active_cores = 0;
+        #if DEBUG >= 4
+            cout << "loops on " << loops << endl;
+        #endif
         for(int i = 0 ; i < CORE_COUNT ; i++){
             void (Core::*execute_fn)() = cores[i].execute;
             if(cores[i].get_sf(sf_map::active).reg.data){
                 active_cores++;
                 (cores[i].*execute_fn)();
+                #if DEBUG >= 4
+                    cout << "core " << i << " was clocked " << endl;
+                #endif
             }
         }
         total_core_cycles += active_cores;
@@ -40,8 +49,9 @@ int start_cpu(T *timer){
             Util::cpu_on = false;
         }
     }
+    cout << "emulator stoped " << endl;
 
-    #if DEBUG == 2 or DEBUG == 3
+    #if DEBUG >= 2
         double elapsed = timer->get_time();
         double cps = total_core_cycles / elapsed;
         cout << "----- end of runtime debug info -----" << endl;

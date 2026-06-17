@@ -1,28 +1,37 @@
 {
-    "data":{
-        "version":1.0,
-        "core_to_boot":0,
-        "boot_method":"binary"
+    "data": {
+        "version": 1.0,
+        "core_to_boot": 0,
+        "boot_method": "preload"
     },
-    "binary":{
-        "binary_path":"C:\\Users\\matt\\.c\\proj1\\c32\\bios\\test_boot_files\\test.c32"
+    "binary": {
+        "binary_path": null
     },
-    "preload":{
-        "sf":{
-            "size":256,
-            "data":[1,0,1]
+    "preload": {
+        "sf": {
+            "size": 256,
+            "data": [
+                1,
+                0,
+                1
+            ]
         },
-        "regs":{
-            "size":4096,
-            "data":[17367039,1040187402,0]
+        "regs": {
+            "size": 4096,
+            "data": [
+                22675466,
+                626655233,
+                425361536,
+                452984833
+            ]
         },
-        "stack":{
-            "size":4096,
-            "data":[0]
+        "stack": {
+            "size": 4096,
+            "data": []
         },
-        "cache":{
-            "size":4096,
-            "data":[0]
+        "cache": {
+            "size": 4096,
+            "data": []
         }
-    }    
+    }
 }

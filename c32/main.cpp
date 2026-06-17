@@ -36,7 +36,7 @@ void init_cores(){
     }
 }
 int main(){
-    #if DEBUG == 2
+    #if DEBUG >= 2
         timer.start_time();
     #endif
     init_cores();
@@ -47,7 +47,7 @@ int main(){
             boot_loader.boot_config["data"]["core_to_boot"].get<uint32_t>()
         ]
     );
-    #if DEBUG == 2
+    #if DEBUG >= 2
         cout << "loaded boot config to core " << boot_loader.boot_config["data"]["core_to_boot"].get<uint32_t>() << " and initialization took an ";
         timer.print_time();
     #else

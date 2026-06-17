@@ -1,9 +1,5 @@
-*reg
-
-add 3 4 3
-lr 55
-# askjhdjhas #
-*import "C:/Users/matt/.c/proj1/c32/assemblers/dave.txt" r
-*stop
-le 3 3 
-lr 33 3
+lr 'Z' 10
+.start
+sdi 'Z' 1
+cmp 'Z' !=
+jmp .start

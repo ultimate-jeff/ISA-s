@@ -347,13 +347,12 @@ class Core {
             init_sf_stats(core_id);
         }
         void execute_normal(){
-            Reg instruction = get_reg(get_sf(sf_map::clk).data);
             last_clk = get_sf(sf_map::clk).data;
+            Reg instruction = get_reg(last_clk);
             uint32_t off1 = get_sf(sf_map::offset0).reg.data;
             uint32_t off2 = get_sf(sf_map::offset1).reg.data;
             uint32_t off3 = get_sf(sf_map::offset2).reg.data;
-
-            #if DEBUG == 1 or DEBUG == 2
+            #if DEBUG >= 4
                 cout << "core " << get_sf(sf_map::core_id).reg.data << " executing instruction with opcode " << instruction.opcode.opcode << " at clk " << get_sf(sf_map::clk).reg.data << endl;
             #endif
 
@@ -1317,6 +1316,7 @@ class Core {
     private:
 
     void init_sf_stats(uint32_t core_id){
+        set_sf(sf_map::active,1);
         set_sf(sf_map::core_id, core_id);
         set_sf(sf_map::reg_size, REG_SIZE);
         set_sf(sf_map::stack_size, STACK_SIZE);
@@ -1336,7 +1336,12 @@ class Core {
         return addr;
     } 
     inline 
-    Reg get_reg(uint32_t addr){return mem->regs[addr];}
+    Reg get_reg(uint32_t addr){
+        if(addr > REG_SIZE){
+            addr = REG_SIZE-1;
+        }
+        return mem->regs[addr];
+    }
     inline 
     void set_reg(uint32_t addr, Reg value){mem->regs[addr] = value;}
     inline

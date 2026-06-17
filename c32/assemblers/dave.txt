@@ -1,8 +1,5 @@
-*reg
-add 3 4 3
-lr 55
-# askjhdjhas #
+*stack
+*r 55
+*r 123123
+*r 255
 *stop
-le 3 3
-lr 33 3
-*end

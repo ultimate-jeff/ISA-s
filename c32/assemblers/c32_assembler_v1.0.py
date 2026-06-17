@@ -4,6 +4,7 @@ import random
 import re
 import typer
 import sys
+import json
 
 
 prin_RED = '\033[91m'
@@ -281,6 +282,41 @@ def write_c32_bin(path:"str",inst:"list",sinst:"list",cinst:"list"):
     except Exception as e:
         print(f"!!-error-!! : {e}")
 
+def write_c32_json(path:"str",inst:"list",sinst:"list",cints:"list"):
+    data = {
+            "data":{
+                "version":1.0,
+                "core_to_boot":0,
+                "boot_method":"preload"
+            },
+            "binary":{
+                "binary_path":None
+            },
+            "preload":{
+                "sf":{
+                    "size":256,
+                    "data":[1,0,1]
+                },
+                "regs":{
+                    "size":4096,
+                    "data":inst
+                },
+                "stack":{
+                    "size":4096,
+                    "data":sinst
+                },
+                "cache":{
+                    "size":4096,
+                    "data":cints
+                }
+            }    
+        }
+    try:
+        with open(path,"w") as f:
+            json.dump(data,f,indent=4)
+    except Exception as e:
+        print(f"!!-error-!! : {e}")
+
 class Assembler():
     error_msgs = ["-----ERROR (you're still a FAILURE 0~0)--{",
         "i can smell the FAILURE!",
@@ -448,7 +484,8 @@ class Assembler():
             line_token = tokens[i]
             command = commands.get(line_token[0])
             if command == 0:
-                adding = not adding
+                #adding = not adding
+                break
             if adding and command != 0:
                 new_tokens.append(line_token)
         return new_tokens
@@ -599,21 +636,43 @@ class Assembler():
 assembler = Assembler()
 app = typer.Typer()
 
-def compile(input_path,output_path):
+def compile(input_path,output_path,flags="f"):
+    flags.lower()
+    print(f"started compiling {input_path} to {output_path}")
     try:
         with open(input_path,"r") as f:
             text = f.read()
         output_data = assembler.compile(text)
-        write_c32_bin(output_path,output_data["*reg"],output_data["*stack"],output_data["*cache"])
+        assembler.print_data()
+        if "p" in flags:
+            print("preload")
+            print("regs:")
+            for instruction in output_data["*reg"]:
+                print(instruction)
+            print("stack:")
+            for instruction in output_data["*stack"]:
+                print(instruction)
+            print("cache")
+            for instruction in output_data["*cache"]:
+                print(instruction)
+        if "b" in flags:
+            write_c32_bin(output_path,output_data["*reg"],output_data["*stack"],output_data["*cache"])
+        if "j" in flags:
+            # write json
+            write_c32_json(output_path,output_data["*reg"],output_data["*stack"],output_data["*cache"])
     except Exception as e:
-        print(f"compiler error during compile {e} (probably do to a file not found)")
+        print(f"compiler error during compile {e}")
     
-@app.command()
-def cli_compile(input_path:str , output_path:str):
-    compile(input_path,output_path)
 
-print("-----")
-if __name__ == "__mane__":
+@app.command()
+def comp(input_path:str , output_path:str,flags:str="wp"):
+    compile(input_path,output_path,flags)
+@app.command()
+def version():
+    print("c32 v1.0.0")
+
+print("----- c32 assembler v1.0 -----")
+if __name__ == "__main__":
     if len(sys.argv) > 1:
         app()  # CLI mode: c32 cli-compile jeff.txt out.c32
     else:
@@ -623,3 +682,4 @@ if __name__ == "__mane__":
         compile(path, output_path)
 
 
+#   python c32_assembler_v1.0.py comp jeff.txt out.c32 
