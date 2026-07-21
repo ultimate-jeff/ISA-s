@@ -14,7 +14,7 @@
 
 #define PREINT_FREQUANCY 5
 
-#define DEBUG 5
+#define DEBUG 3
 /*
 DEBUG:
 1 or 2 shows u what instruction each core exacutes 

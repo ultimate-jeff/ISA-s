@@ -1,8 +1,38 @@
-lr 50 64
-lr 51 1
-.start
-sdi 50 1
-cmp_or 50 163 0
-dump_reg 50
-dump_sf 3 ;
-jmpu .start
+lr 20 20
+lr 21 1
+nop
+.loop
+nop
+sub 21 20 20
+cmp_or 20 128 0
+sub 21 20 20
+cmp_or 20 128 0
+sub 21 20 20
+cmp_or 20 128 0
+sub 21 20 20
+cmp_or 20 128 0
+sub 21 20 20
+cmp_or 20 128 0
+sub 21 20 20
+cmp_or 20 128 0
+sub 21 20 20
+cmp_or 20 128 0
+sub 21 20 20
+cmp_or 20 128 0
+sub 21 20 20
+cmp_or 20 128 0
+sub 21 20 20
+cmp_or 20 128 0
+move 20 21
+sub 21 20 20
+cmp_or 20 128 0
+move 30 32
+lr 10 5
+push_core 2 0 0
+push_core 2 1 1
+push_core 2 2 2
+push_core 3 3 3
+push_core 4 4 4
+lr 10 1
+push_cstate 10 0
+

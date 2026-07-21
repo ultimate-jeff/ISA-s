@@ -37,206 +37,239 @@ class ALU {
     static constexpr Reg nullreg = {0};
     public:
         uint32_t alu_flags = 0;
-
-        inline Reg add(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg add(Reg a, Reg b){
             Reg result;
             result.data = a.data + b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg sub(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg sub(Reg a, Reg b){
             Reg result;
             result.data = a.data - b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg mul(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg mul(Reg a, Reg b){
             Reg result;
             result.data = a.data * b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg div(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg div(Reg a, Reg b){
             Reg result;
             result.data = a.data / b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg AND(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg AND(Reg a, Reg b){
             Reg result;
             result.data = a.data & b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg NAND(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg NAND(Reg a, Reg b){
             Reg result;
             result.data = ~(a.data & b.data);
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg OR(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg OR(Reg a, Reg b){
             Reg result;
             result.data = a.data | b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg XOR(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg XOR(Reg a, Reg b){
             Reg result;
             result.data = a.data ^ b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg add32(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg add32(Reg a, Reg b){
             Reg result;
             result.data = a.data + b.data;
             alu_complete32(&result, a, b);
             return result;
         }
-        inline Reg sub32(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg sub32(Reg a, Reg b){
             Reg result;
             result.data = a.data - b.data;
             alu_complete32(&result, a, b);
             return result;
         }
-        inline Reg OR32(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg OR32(Reg a, Reg b){
             Reg result;
             result.data = a.data | b.data;
             alu_complete32(&result, a, b);
             return result;
         }
-        inline Reg AND32(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg AND32(Reg a, Reg b){
             Reg result;
             result.data = a.data & b.data;
             alu_complete32(&result, a, b);
             return result;
         }
-        inline Reg NAND32(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg NAND32(Reg a, Reg b){
             Reg result;
             result.data = ~(a.data & b.data);
             alu_complete32(&result, a, b);
             return result;
         }
-        inline Reg XOR32(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg XOR32(Reg a, Reg b){
             Reg result;
             result.data = a.data ^ b.data;
             alu_complete32(&result, a, b);
             return result;
         }
-        inline Reg shift(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg shift(Reg a, Reg b){
             Reg result;
             result.data = a.data >> b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg shiftl(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg shiftl(Reg a, Reg b){
             Reg result;
             result.data = a.data << b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg shift32(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg shift32(Reg a, Reg b){
             Reg result;
             result.data = a.data >> b.data;
             alu_complete32(&result, a, b);
             return result;
         }
-        inline Reg shift32l(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg shift32l(Reg a, Reg b){
             Reg result;
             result.data = a.data << b.data;
             alu_complete32(&result, a, b);
             return result;
         }
-        inline Reg shift_abs(Reg a, uint32_t imm){
+        inline __attribute__((always_inline))
+        Reg shift_abs(Reg a, uint32_t imm){
             Reg result;
             result.data = a.data >> imm;
             alu_complete16(&result, a, nullreg);
             return result;
         }
-        inline Reg shiftl_abs(Reg a, uint32_t imm){
+        inline __attribute__((always_inline))
+        Reg shiftl_abs(Reg a, uint32_t imm){
             Reg result;
             result.data = a.data << imm;
             alu_complete16(&result, a, nullreg);
             return result;
         }
-        inline Reg shift32_abs(Reg a, uint32_t imm){
+        inline __attribute__((always_inline))
+        Reg shift32_abs(Reg a, uint32_t imm){
             Reg result;
             result.data = a.data >> imm;
             alu_complete32(&result, a, nullreg);
             return result;
         }
-        inline Reg shift32l_abs(Reg a, uint32_t imm){
+        inline __attribute__((always_inline))
+        Reg shift32l_abs(Reg a, uint32_t imm){
             Reg result;
             result.data = a.data << imm;
             alu_complete32(&result, a, nullreg);
             return result;
         }
-        inline Reg adi(Reg a, uint32_t imm){
+        inline __attribute__((always_inline))
+        Reg adi(Reg a, uint32_t imm){
             Reg result;
             result.reg.data = a.data + imm;
             alu_complete16(&result, a, nullreg);
             return result;
         }
-        inline Reg sbi(Reg a, uint32_t imm){
+        inline __attribute__((always_inline))
+        Reg sbi(Reg a, uint32_t imm){
             Reg result;
             result.reg.data = a.data - imm;
             alu_complete16(&result, a, nullreg);
             return result;
         }
-        inline Reg mdi(Reg a, uint32_t imm){
+        inline __attribute__((always_inline))
+        Reg mdi(Reg a, uint32_t imm){
             Reg result;
             result.reg.data = a.data * imm;
             alu_complete16(&result, a, nullreg);
             return result;
         }
-        inline Reg ddi(Reg a, uint32_t imm){
+        inline __attribute__((always_inline))
+        Reg ddi(Reg a, uint32_t imm){
             Reg result;
             result.reg.data = a.data / imm;
             alu_complete16(&result, a, nullreg);
             return result;
         }
-        inline Reg abs(Reg a){
+        inline __attribute__((always_inline))
+        Reg abs(Reg a){
             Reg result;
             result.reg.data = (a.sdata < 0) ? -a.sdata : a.sdata;
             alu_complete16(&result, a, nullreg);
             return result;
         }
-        inline Reg mod(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg mod(Reg a, Reg b){
             Reg result;
             result.reg.data = a.data % b.data;
             alu_complete16(&result, a, b);
             return result;
         }
-        inline Reg FMOD(Reg a , Reg b){
+        inline __attribute__((always_inline))
+        Reg FMOD(Reg a , Reg b){
             Reg result;
             result.reg.data = fmod(a.fdata , b.fdata);
             alu_complete_float(&result, a, b);
             return result;
         }
-        inline Reg sqrt(Reg a){
+        inline __attribute__((always_inline))
+        Reg sqrt(Reg a){
             Reg result;
             result.reg.data = static_cast<uint32_t>(sqrtf(static_cast<float>(a.data)));
             alu_complete16(&result, a, nullreg);
             return result;
         }
-        inline Reg fadd(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg fadd(Reg a, Reg b){
             Reg result;
             result.fdata = a.fdata + b.fdata;
             alu_complete_float(&result , a, b);
             return result;
         }
-        inline Reg fsub(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg fsub(Reg a, Reg b){
             Reg result;
             result.fdata = a.fdata - b.fdata;
             alu_complete_float(&result , a, b);
             return result;
         }
-        inline Reg fmul(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg fmul(Reg a, Reg b){
             Reg result;
             result.fdata = a.fdata * b.fdata;
             alu_complete_float(&result , a, b);
             return result;
         }
-        inline Reg fdiv(Reg a, Reg b){
+        inline __attribute__((always_inline))
+        Reg fdiv(Reg a, Reg b){
             Reg result;
             result.fdata = a.fdata / b.fdata;
             alu_complete_float(&result , a, b);
@@ -244,7 +277,8 @@ class ALU {
         }
        
     public: // cmp's
-        inline Reg cmp(Reg a, uint8_t flags , uint8_t invert_mask){
+        inline __attribute__((always_inline))
+        Reg cmp(Reg a, uint8_t flags , uint8_t invert_mask){
             a.reg.flags ^= invert_mask; // invert flags according to instruction
             Reg sf_do_jmp;
             sf_do_jmp.reg.data = ((a.reg.flags & flags) == flags); // mask out unneeded flags
@@ -253,7 +287,8 @@ class ALU {
             #endif
             return sf_do_jmp;
         }
-        inline Reg cmp_or(Reg a , uint8_t flags , uint8_t invert_mask){
+        inline __attribute__((always_inline))
+        Reg cmp_or(Reg a , uint8_t flags , uint8_t invert_mask){
             a.reg.flags ^= invert_mask; // invert flags according to instruction
             Reg sf_do_jmp;
             sf_do_jmp.reg.data = ((a.reg.flags & flags) != 0); // mask out unneeded flags
@@ -262,7 +297,8 @@ class ALU {
             #endif
             return sf_do_jmp;
         }
-        inline Reg cmp_and(Reg a , uint8_t flags , uint8_t invert_mask){
+        inline __attribute__((always_inline))
+        Reg cmp_and(Reg a , uint8_t flags , uint8_t invert_mask){
             a.reg.flags ^= invert_mask; // invert flags according to instruction
             Reg sf_do_jmp;
             sf_do_jmp.reg.data = (a.reg.flags == flags); // mask out unneeded flags
@@ -271,7 +307,8 @@ class ALU {
             #endif
             return sf_do_jmp;
         }
-        inline Reg cmp_reg (Reg a, uint8_t flags , uint8_t invert_mask){
+        inline __attribute__((always_inline))
+        Reg cmp_reg (Reg a, uint8_t flags , uint8_t invert_mask){
             a.bits_16_8.p2 ^= invert_mask; // invert flags according to instruction
             Reg sf_do_jmp;
             sf_do_jmp.reg.data = ((a.bits_16_8.p2 & flags) == flags); // mask out unneeded flags
@@ -283,10 +320,10 @@ class ALU {
         
 
     public:
-    inline void alu_complete_float(Reg* result, Reg a, Reg b){
+    inline __attribute__((always_inline)) void alu_complete_float(Reg* result, Reg a, Reg b){
         alu_flags = gen_flags_float(result->fdata, a.fdata, b.fdata);
     }
-    inline 
+    inline __attribute__((always_inline))
     void alu_complete16(Reg *result , Reg a, Reg b){
         result->reg.flags = gen_flags_16(result->reg.data, a.reg.data, b.reg.data);
         result->reg.meta_data = a.reg.meta_data;
@@ -295,12 +332,12 @@ class ALU {
         #endif
         //return result;
     }
-    inline 
+    inline __attribute__((always_inline)) 
     void alu_complete32(Reg *result , Reg a, Reg b){
         alu_flags = gen_flags_32(result->reg.data, a.reg.data, b.reg.data);
         //return result;
     }
-    inline 
+    inline __attribute__((always_inline)) 
     uint8_t gen_flags_16(uint32_t result,uint32_t ra ,uint32_t rb){
         uint8_t flags = (
             (1u) | // true
@@ -314,7 +351,7 @@ class ALU {
         );
         return flags;
     }
-    inline
+    inline __attribute__((always_inline))
     uint8_t gen_flags_32(uint32_t result, uint32_t ra, uint32_t rb) {
         return (
             (1u) | // true
@@ -327,7 +364,7 @@ class ALU {
             (ra == rb) << 7 // == 
         );
     }
-    inline
+    inline __attribute__((always_inline))
     uint8_t gen_flags_float(float result, float ra, float rb) {
         return (
             (1u)                         |   // true
@@ -668,134 +705,165 @@ class Core {
             }
         }
 
-
     private: 
+        inline __attribute__((always_inline))
         void hult(Reg instruction){
             set_sf(sf_map::active, {0});
         }
+        inline __attribute__((always_inline))
         void lr(Reg instruction ,uint32_t off1){
             set_reg(instruction.bits_8_16.p1+off1, instruction.bits_8_16.p2);
         }
+        inline __attribute__((always_inline))
         void move(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2, get_reg(instruction.bits_8_8_8.p1+off1));
         }
+        inline __attribute__((always_inline))
         void move_abs(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2, get_reg(instruction.bits_8_8_8.p1+off1));
         }
+        inline __attribute__((always_inline))
         void push_stack(Reg instruction,uint32_t off1,uint32_t off2){
             set_stack(instruction.bits_8_8_8.p2+off2, get_reg(instruction.bits_8_8_8.p1+off1));
         }
+        inline __attribute__((always_inline))
         void pull_stack(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2, get_stack(instruction.bits_8_8_8.p1+off1));
         }
+        inline __attribute__((always_inline))
         void push_cache(Reg instruction ,uint32_t off1,uint32_t off2){
             set_cash(instruction.bits_8_8_8.p2+off2, get_reg(instruction.bits_8_8_8.p1+off1));
         }
+        inline __attribute__((always_inline))
         void pull_cache(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2, get_cash(instruction.bits_8_8_8.p1+off1));
         }
+        inline __attribute__((always_inline))
         void lr_block(Reg instruction,uint32_t off1){
             for(int i = 0 ; i < 3 ; i++){
                 set_reg(instruction.bits_8_16.p1 + i + off1, instruction.bits_16_8.p2);
             }
         }
+        inline __attribute__((always_inline))
         void move_block(Reg instruction,uint32_t off1,uint32_t off2){
             for(int i = 0 ; i < 3 ; i++){
                 set_reg(instruction.bits_8_8_8.p2 + i + off2, get_reg(instruction.bits_8_8_8.p1 + i + off1));
             }
         }
+        inline __attribute__((always_inline))
         void push_bs(Reg instruction, uint32_t off1,uint32_t off2){
             for(int i = 0 ; i < 3 ; i++){
                 set_stack(instruction.bits_8_8_8.p2 + i + off2, get_reg(instruction.bits_8_8_8.p1 + i + off1));
             }
         }
+        inline __attribute__((always_inline))
         void pull_bs(Reg instruction,uint32_t off1,uint32_t off2){
             for(int i = 0 ; i < 3 ; i++){
                 set_reg(instruction.bits_8_8_8.p2 + i + off2, get_stack(instruction.bits_8_8_8.p1 + i + off1));
             }
         }
+        inline __attribute__((always_inline))
         void push_bc(Reg instruction,uint32_t off1,uint32_t off2){
             for(int i = 0 ; i < 3 ; i++){
                 set_cash(instruction.bits_8_8_8.p2 + i + off2, get_reg(instruction.bits_8_8_8.p1 + i + off1));
             }
         }
+        inline __attribute__((always_inline))
         void pull_bc(Reg instruction,uint32_t off1,uint32_t off2){
             for(int i = 0 ; i < 3 ; i++){
                 set_reg(instruction.bits_8_8_8.p2 + i + off2, get_cash(instruction.bits_8_8_8.p1 + i + off1));
             }
         }
+        inline __attribute__((always_inline))
         void add(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.add(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void sub(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.sub(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void add32(Reg instruction , uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.add32(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void AND(Reg instruction , uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.AND(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void NAND(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.NAND(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void OR(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.OR(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void XOR(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.XOR(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void shift(Reg instruction, uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.shift(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void shift_abs(Reg instruction , uint32_t off1, uint32_t off3){
             Reg result = alu.shift_abs(get_reg(instruction.bits_8_8_8.p1 + off1), instruction.bits_8_8_8.p2);
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void shift32(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.shift32(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void shift32_abs(Reg instruction , uint32_t off1, uint32_t off3){
             Reg result = alu.shift32_abs(get_reg(instruction.bits_8_8_8.p1 + off1), instruction.bits_8_8_8.p2);
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void cmp(Reg instruction , uint32_t off1){
             Reg result = alu.cmp(get_reg(instruction.bits_8_8_8.p1 + off1), instruction.bits_8_8_8.p2, instruction.bits_8_8_8.p3);
             set_sf(sf_map::do_jmp, result);
         }
+        inline __attribute__((always_inline))
         void jmpu(Reg instruction){
             set_sf(sf_map::clk, instruction.bits_16_8.p1);
         }
+        inline __attribute__((always_inline))
         void jmp(Reg instruction){
             if(get_sf(sf_map::do_jmp).reg.data){
                 set_sf(sf_map::clk, instruction.bits_16_8.p1);
             }
         }
+        inline __attribute__((always_inline))
         void jmp_ptr(Reg instruction,uint32_t off1){
             if(get_sf(sf_map::do_jmp).reg.data){
                 set_sf(sf_map::clk, get_reg(instruction.bits_8_16.p1 + off1).data);
             }
         }
+        inline __attribute__((always_inline))
         void ccall(Reg instruction){
             if(get_sf(sf_map::do_jmp).data){
                 mem->call_stack.push_back({get_sf(sf_map::clk).reg.data}); // push return address
                 set_sf(sf_map::clk, instruction.bits_16_8.p1);
             }
         }
+        inline __attribute__((always_inline))
         void call(Reg instruction){
             mem->call_stack.push_back({get_sf(sf_map::clk).reg.data}); // push return address
             set_sf(sf_map::clk, instruction.bits_16_8.p1);
         }
+        inline __attribute__((always_inline))
         void ret(Reg instruction){
             if(!mem->call_stack.empty()){
                 Reg return_address = mem->call_stack.back();
@@ -803,9 +871,11 @@ class Core {
                 set_sf(sf_map::clk, return_address.data);
             }
         }
+        inline __attribute__((always_inline))
         void append(Reg instruction ,uint32_t off1){
             mem->call_stack.push_back(get_reg(instruction.bits_8_16.p1 + off1));
         }
+        inline __attribute__((always_inline))
         void pop(Reg instruction , uint32_t off1){
             if(!mem->call_stack.empty()){
                 Reg value = mem->call_stack.back();
@@ -813,23 +883,29 @@ class Core {
                 set_reg(instruction.bits_8_16.p1 + off1, value);
             }
         }
+        inline __attribute__((always_inline))
         void push_cstack(Reg instruction, uint32_t off1){
             mem->call_stack[instruction.bits_8_8_8.p2] = get_reg(instruction.bits_8_8_8.p1 + off1);
         }
+        inline __attribute__((always_inline))
         void pull_cstack(Reg instruction , uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2 + off2, mem->call_stack[instruction.bits_8_8_8.p1]);
         }
+        inline __attribute__((always_inline))
         void ADI(Reg instruction,uint32_t off1){
             Reg result = alu.adi(get_reg(instruction.bits_8_16.p1 + off1), instruction.bits_8_16.p2);
             set_reg(instruction.bits_8_16.p1 + off1, result);
         }
+        inline __attribute__((always_inline))
         void SDI(Reg instruction,uint32_t off1){
             Reg result = alu.sbi(get_reg(instruction.bits_8_16.p1 + off1), instruction.bits_8_16.p2);
             set_reg(instruction.bits_8_16.p1 + off1, result);
         }
+        inline __attribute__((always_inline))
         void ld_ptr(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2 + off2, get_reg(instruction.bits_8_8_8.p1 + off1));
         }
+        inline __attribute__((always_inline))
         void intrp(Reg instruction,uint32_t off2){
             Core& target = cores[instruction.bits_8_8_8.p1];
             if(target.get_sf(sf_map::interruptable).reg.data){
@@ -838,86 +914,109 @@ class Core {
                 target.set_sf(sf_map::active,1);
             }
         }
+        inline __attribute__((always_inline))
         void mult(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.mul(get_reg(instruction.bits_8_8_8.p1 + off1), get_reg(instruction.bits_8_8_8.p2 + off2));
             set_reg(instruction.bits_8_8_8.p3 + off3, result);
         }
+        inline __attribute__((always_inline))
         void push_clk(Reg instruction,uint32_t off1){
             set_sf(sf_map::clk,get_reg(instruction.bits_8_8_8.p1 + off1));
         }
+        inline __attribute__((always_inline))
         void pull_clk(Reg instruction,uint32_t off1){
             set_reg(instruction.bits_8_8_8.p1 + off1,get_sf(sf_map::clk));
         }
+        inline __attribute__((always_inline))
         void push_sf(Reg instruction, uint32_t off1){
             set_sf(instruction.bits_8_8_8.p2,get_reg(instruction.bits_8_8_8.p1 + off1));
         }
+        inline __attribute__((always_inline))
         void pull_sf(Reg instruction,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2 + off2,get_sf(instruction.bits_8_8_8.p1));
         }
+        inline __attribute__((always_inline))
         void ld_block_offset(Reg instruction,uint32_t off1){
             for(int i = 0; i < 2 ; i++){
                 set_sf(sf_map::offset0+i,get_reg(instruction.bits_16_8.p1+i+off1));
             }
         }
+        inline __attribute__((always_inline))
         void ld_block_offset_stack(Reg instruction,uint32_t off1){
             for(int i = 0; i < 2 ; i++){
                 set_sf(sf_map::offset0+i,get_stack(instruction.bits_16_8.p1+i+off1));
             }
         }
+        inline __attribute__((always_inline))
         void ld_block_offset_cache(Reg instruction,uint32_t off1){
             for(int i = 0; i < 2 ; i++){
                 set_sf(sf_map::offset0+i,get_cash(instruction.bits_16_8.p1+i+off1));
             }
         }
+        inline __attribute__((always_inline))
         void set_sf(Reg instruction){
             set_sf(instruction.bits_8_16.p1,instruction.bits_8_16.p2);
         }
+        inline __attribute__((always_inline))
         void cmp_and(Reg instruction, uint32_t off1){
             set_sf(sf_map::do_jmp,alu.cmp_and(get_reg(instruction.bits_8_8_8.p1 + off1),instruction.bits_8_8_8.p2,instruction.bits_8_8_8.p3));
         }
+        inline __attribute__((always_inline))
         void cmp_or(Reg instruction,uint32_t off1){
             set_sf(sf_map::do_jmp,alu.cmp_or(get_reg(instruction.bits_8_8_8.p1 + off1),instruction.bits_8_8_8.p2,instruction.bits_8_8_8.p3));
         }
+        inline __attribute__((always_inline))
         void cmove_abs(Reg instruction,uint32_t off1,uint32_t off2){
             if(get_sf(sf_map::do_jmp).reg.data){
                 move_abs(instruction,off1,off2);
             }
         }
+        inline __attribute__((always_inline))
         void cmove_ptr(Reg instruction,uint32_t off1,uint32_t off2){
             if(get_sf(sf_map::do_jmp).reg.data){
                 move(instruction,off1,off2);
             }
         }
+        inline __attribute__((always_inline))
         void addr_to_block(Reg instruction, uint32_t off2){
             set_reg(instruction.bits_16_8.p2+off2,instruction.bits_16_8.p1 % 4);
         }
+        inline __attribute__((always_inline))
         void block_to_addr(Reg instruction,uint32_t off2){
             set_reg(instruction.bits_16_8.p2+off2,instruction.bits_16_8.p1*4);
         }
+        inline __attribute__((always_inline))
         void ATB_ptr(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2,get_reg(instruction.bits_8_8_8.p1+off1).reg.data % 4);
         }
+        inline __attribute__((always_inline))
         void BTA_ptr(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2,get_reg(instruction.bits_8_8_8.p1+off1).reg.data);
         }
+        inline __attribute__((always_inline))
         void syscall(Reg instruction){
             uint32_t jmp_addr = get_reg(instruction.bits_8_16.p1+get_sf(sf_map::sc_offset).reg.data).reg.data;
             set_sf(sf_map::clk,jmp_addr);
         }
+        inline __attribute__((always_inline))
         void push_sc_table(Reg instruction){
             set_reg(instruction.bits_8_8_8.p1+get_sf(sf_map::sc_offset).reg.data,get_reg(instruction.bits_8_8_8.p2));
         }
+        inline __attribute__((always_inline))
         void pull_sc_table(Reg instruction){
             set_reg(instruction.bits_8_8_8.p1,get_reg(instruction.bits_8_8_8.p1 + get_sf(sf_map::sc_offset).reg.data));
         }
+        inline __attribute__((always_inline))
         void ABS(Reg instruction, uint32_t off1, uint32_t off2){
             set_reg(instruction.bits_8_8_8.p1+off2,alu.abs(get_reg(instruction.bits_8_8_8.p2+off1)));
         }
+        inline __attribute__((always_inline))
         void nop(Reg instruction){
             for(int i = 0 ; i < 50 ; i++){
                 __asm__ volatile("nop");
             }
         }
+        inline __attribute__((always_inline))
         void stall(Reg instruction, uint32_t off1){
             for(int i = 0 ; i < get_reg(instruction.bits_8_16.p1+off1).reg.data ; i++){
                 for(int i = 0 ; i < 50 ; i++){
@@ -925,37 +1024,47 @@ class Core {
                 }
             }
         }
+        inline __attribute__((always_inline))
         void jmp_ptr_u(Reg instruction, uint32_t off1){
             set_sf(sf_map::clk, get_reg(instruction.bits_8_16.p1+off1).data);
         }
+        inline __attribute__((always_inline))
         void push_cache_ptr(Reg instruction,uint32_t off1,uint32_t off2){
             set_cash(get_reg(instruction.bits_8_8_8.p2+off2).reg.data,get_reg(instruction.bits_8_8_8.p1+off1));
         }
+        inline __attribute__((always_inline))
         void pull_cash_ptr(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p1+off1, get_cash(get_reg(instruction.bits_8_8_8.p2+off2).reg.data));
         }
+        inline __attribute__((always_inline))
         void push_stack_ptr(Reg instruction,uint32_t off1,uint32_t off2){
             set_stack(get_reg(instruction.bits_8_8_8.p2+off2).reg.data,get_reg(instruction.bits_8_8_8.p1+off1));
         }
+        inline __attribute__((always_inline))
         void pull_stack_ptr(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p1+off1, get_stack(get_reg(instruction.bits_8_8_8.p2+off2).reg.data));
         }
+        inline __attribute__((always_inline))
         void push_cstate(Reg instruction,uint32_t off2){
             Core& core = cores[instruction.bits_8_8_8.p1];
             core.set_sf(instruction.bits_8_8_8.p3,get_reg(instruction.bits_8_8_8.p2+off2));
         }
+        inline __attribute__((always_inline))
         void pull_cstate(Reg instruction,uint32_t off2){
             Core& core = cores[instruction.bits_8_8_8.p1];
             set_reg(instruction.bits_8_8_8.p2+off2,core.get_sf(instruction.bits_8_8_8.p3));
         }
+        inline __attribute__((always_inline))
         void push_core(Reg instruction,uint32_t off2,uint32_t off3){
             Core& core = cores[instruction.bits_8_8_8.p1];
             core.set_reg(instruction.bits_8_8_8.p3+off3,get_reg(instruction.bits_8_8_8.p2+off2));
         }
+        inline __attribute__((always_inline))
         void pull_core(Reg instruction,uint32_t off2,uint32_t off3){
             Core& core = cores[instruction.bits_8_8_8.p1];
             set_reg(instruction.bits_8_8_8.p3+off3,core.get_reg(instruction.bits_8_8_8.p2+off2));
         }
+        inline __attribute__((always_inline))
         void iret(Reg instruction){
             if(!mem->call_stack.empty()){
                 Reg return_address = mem->call_stack.back();
@@ -963,56 +1072,68 @@ class Core {
                 set_sf(sf_map::clk, return_address.data);
             }
         }
+        inline __attribute__((always_inline))
         void cstall(Reg instruction, uint32_t off2){
             Core& core = cores[instruction.bits_8_8_8.p1];
             core.mstall(get_reg(instruction.bits_8_8_8.p2+off2).reg.data);
         }
+        inline __attribute__((always_inline))
         void RAND(Reg instruction, uint32_t off1){
             set_reg(instruction.bits_8_16.p1+off1,rand32(get_sf(sf_map::curent_loop).data));
         }
+        inline __attribute__((always_inline))
         void onecount(Reg instruction, uint32_t off1, uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2,__builtin_popcount(get_reg(instruction.bits_8_8_8.p1+off1).reg.data));
         }
+        inline __attribute__((always_inline))
         void zerocount(Reg instruction, uint32_t off1, uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2,32-__builtin_popcount(get_reg(instruction.bits_8_8_8.p1+off1).reg.data));
         }
+        inline __attribute__((always_inline))
         void MOD(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.mod(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
         }
+        inline __attribute__((always_inline))
         void div(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.div(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
         }
+        inline __attribute__((always_inline))
         void loop_p(Reg instruction){
             if(get_sf(sf_map::counter).reg.data != get_sf(sf_map::counter_target).reg.data){
                 set_sf(sf_map::clk, instruction.bits_16_8.p1);
                 set_sf(sf_map::counter,get_sf(sf_map::counter).reg.data+1);
             }
         }
+        inline __attribute__((always_inline))
         void loop_ptr_p(Reg instruction, uint32_t off1){
             if(get_sf(sf_map::counter).reg.data != get_sf(sf_map::counter_target).reg.data){
                 set_sf(sf_map::clk, get_reg(instruction.bits_8_16.p1+off1).reg.data);
                 set_sf(sf_map::counter,get_sf(sf_map::counter).reg.data+1);
             }
         }
+        inline __attribute__((always_inline))
         void loop_m(Reg instruction){
             if(get_sf(sf_map::counter).reg.data != get_sf(sf_map::counter_target).reg.data){
                 set_sf(sf_map::clk, instruction.bits_16_8.p1);
                 set_sf(sf_map::counter,get_sf(sf_map::counter).reg.data-1);
             }
         }
+        inline __attribute__((always_inline))
         void loop_ptr_m(Reg instruction, uint32_t off1){
             if(get_sf(sf_map::counter).reg.data != get_sf(sf_map::counter_target).reg.data){
                 set_sf(sf_map::clk, get_reg(instruction.bits_8_16.p1+off1).reg.data);
                 set_sf(sf_map::counter,get_sf(sf_map::counter).reg.data-1);
             }
         }
+        inline __attribute__((always_inline))
         void WHILE(Reg instruction){
             if(get_sf(sf_map::counter).reg.data != get_sf(sf_map::counter_target).reg.data){
                 set_sf(sf_map::clk, instruction.bits_16_8.p1);
             }
         }
+        inline __attribute__((always_inline))
         void push_block_core(Reg instruction,uint32_t off2,uint32_t off3){
             Core& core = cores[instruction.bits_8_8_8.p1];
             for(int i = 0 ; i < 3 ; i++){
@@ -1021,6 +1142,7 @@ class Core {
                 }
             }
         }
+        inline __attribute__((always_inline))
         void pull_block_core(Reg instruction,uint32_t off2,uint32_t off3){
             Core& core = cores[instruction.bits_8_8_8.p1];
             for(int i = 0 ; i < 3 ; i++){
@@ -1029,37 +1151,45 @@ class Core {
                 }
             }
         }
+        inline __attribute__((always_inline))
         void sub32(Reg instruction, uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.sub32(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void and32(Reg instruction, uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.AND32(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void NAND32(Reg instruction, uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.NAND32(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void OR32(Reg instruction, uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.OR32(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void XOR32(Reg instruction, uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.XOR32(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void ld_stack(Reg instruction ,uint32_t off1){
             set_stack(instruction.bits_8_16.p1+off1,instruction.bits_8_16.p2);
         }
+        inline __attribute__((always_inline))
         void ld_cash(Reg instruction, uint32_t off1){
             set_cash(instruction.bits_8_16.p1+off1,instruction.bits_8_16.p2);
         }
+        inline __attribute__((always_inline))
         void ld_byte(Reg instruction,uint32_t off1){
             Reg r = get_reg(instruction.bits_8_8_8.p1+off1);
             uint8_t byte_val = instruction.bits_8_8_8.p3 & 0xFF;
@@ -1080,118 +1210,145 @@ class Core {
             }
             set_reg(instruction.bits_8_8_8.p1, r);
         }
+        inline __attribute__((always_inline))
         void mult_sined(Reg instruction, uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.mul(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
         }
+        inline __attribute__((always_inline))
         void syscall_ptr(Reg instruction, uint32_t off1){
             uint32_t jmp_addr = get_reg(get_reg(instruction.bits_8_16.p1+off1).bits_8_8_8.p1+get_sf(sf_map::sc_offset).reg.data).reg.data;
             set_sf(sf_map::clk,jmp_addr);
         }
+        inline __attribute__((always_inline))
         void set_flags(Reg instruction, uint32_t off1){
             Reg value = get_reg(instruction.bits_8_8_8.p1+off1);
             value.reg.flags = instruction.bits_8_8_8.p2;
             set_reg(instruction.bits_8_8_8.p1+off1,value);
         }
+        inline __attribute__((always_inline))
         void test(Reg instruction, uint32_t off1,uint32_t off2){
             Reg result = alu.AND(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_sf(sf_map::alu_flags,result.reg.flags);
         }
+        inline __attribute__((always_inline))
         void SWAP(Reg instruction, uint32_t off1, uint32_t off2){
             Reg r1 = get_reg(instruction.bits_8_8_8.p1+off1);
             Reg r2 = get_reg(instruction.bits_8_8_8.p2+off2);
             set_reg(instruction.bits_8_8_8.p1+off1, r2);
             set_reg(instruction.bits_8_8_8.p2+off2, r1);
         }
+        inline __attribute__((always_inline))
         void mdi(Reg instruction, uint32_t off1){
             Reg result = alu.mdi(get_reg(instruction.bits_8_16.p1+off1), instruction.bits_8_16.p2);
             set_reg(instruction.bits_8_16.p1+off1, result);
         }
+        inline __attribute__((always_inline))
         void ddi(Reg instruction, uint32_t off1){
             Reg result = alu.ddi(get_reg(instruction.bits_8_16.p1+off1), instruction.bits_8_16.p2);
             set_reg(instruction.bits_8_16.p1+off1, result);
         }
+        inline __attribute__((always_inline))
         void ld_sf_ptr(Reg instruction,uint32_t off2){
             set_sf(instruction.bits_8_8_8.p1,get_reg(instruction.bits_8_8_8.p2+off2));
         }
+        inline __attribute__((always_inline))
         void lock_cache(Reg instruction){
             Util::cache_locked = true;
         }
+        inline __attribute__((always_inline))
         void unlock_cache(Reg instruction){
             Util::cache_locked = true;
         }
+        inline __attribute__((always_inline))
         void lock_mem(Reg instruction){
             Core& core = cores[instruction.bits_8_8_8.p1];
             core.mem->locked = true;
         }
+        inline __attribute__((always_inline))
         void unlock_mem(Reg instruction){
             Core& core = cores[instruction.bits_8_8_8.p1];
             core.mem->locked = false;
         }
+        inline __attribute__((always_inline))
         void push_flags(Reg instruction, uint32_t off1){
             uint32_t flags;
             flags = get_reg(instruction.bits_8_8_8.p1+off1).reg.flags ^ instruction.bits_8_8_8.p2;
             set_sf(sf_map::alu_flags,flags);
         }
+        inline __attribute__((always_inline))
         void jmpf(Reg instruction){
             uint32_t requierd_flags = instruction.bits_16_8.p2;
             if((get_sf(sf_map::alu_flags).bits_16_8.p2 & requierd_flags) == requierd_flags){
                 set_sf(sf_map::clk,instruction.bits_16_8.p1);
             }
         }
+        inline __attribute__((always_inline))
         void jmpf_ptr(Reg instruction,uint32_t off1){
             uint32_t requierd_flags = instruction.bits_8_8_8.p2;
             if((get_sf(sf_map::alu_flags).bits_8_8_8.p2 & requierd_flags) == requierd_flags){
                 set_sf(sf_map::clk,get_reg(instruction.bits_8_8_8.p1+off1));
             }
         }
+        inline __attribute__((always_inline))
         void fadd(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.fadd(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void fsub(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.fsub(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void fmult(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.fmul(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void fdiv(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.fdiv(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void int_to_f(Reg instruction,uint32_t off1,uint32_t off2){
             Reg result;
             result.fdata = (float)get_reg(instruction.bits_8_8_8.p1+off1).sdata;
             set_reg(instruction.bits_8_8_8.p2+off2, result);
         }
+        inline __attribute__((always_inline))
         void f_to_int(Reg instruction,uint32_t off1,uint32_t off2){
             Reg result;
             result.sdata = (int)get_reg(instruction.bits_8_8_8.p1+off1).fdata;
             set_reg(instruction.bits_8_8_8.p2+off2, result);
         }
+        inline __attribute__((always_inline))
         void NULL_116(Reg instruction){
 
         }
+        inline __attribute__((always_inline))
         void clear(Reg instruction,uint32_t off1){
             set_reg(instruction.bits_8_16.p1+off1,nullreg);
         }
+        inline __attribute__((always_inline))
         void MIN(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             set_reg(instruction.bits_8_8_8.p3+off3,min(get_reg(instruction.bits_8_8_8.p1+off1).reg.data,get_reg(instruction.bits_8_8_8.p2+off2).reg.data));
         }
+        inline __attribute__((always_inline))
         void MAX(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             set_reg(instruction.bits_8_8_8.p3+off3,max(get_reg(instruction.bits_8_8_8.p1+off1).reg.data,get_reg(instruction.bits_8_8_8.p2+off2).reg.data));
         }
+        inline __attribute__((always_inline))
         void clear_block(Reg instruction,uint32_t off1){
             for(int i = 0 ; i < 3 ; i++){
                 set_reg(instruction.bits_8_16.p1+off1+i,nullreg);
             }
         }
+        inline __attribute__((always_inline))
         void intrp_abs(Reg instruction){
             Core& target = cores[instruction.bits_8_16.p1];
             if(target.get_sf(sf_map::interruptable).reg.data){
@@ -1200,101 +1357,126 @@ class Core {
                 target.set_sf(sf_map::active,1);
             }
         }
+        inline __attribute__((always_inline))
         void wf_intrp(Reg instruction){
             set_sf(sf_map::active,0);
             set_sf(sf_map::interruptable, 1);
         }
+        inline __attribute__((always_inline))
         void fabs(Reg instruction,uint32_t off1,uint32_t off2){
             Reg result;
             result.fdata = abs(get_reg(instruction.bits_8_8_8.p1+off1).fdata);
             set_reg(instruction.bits_8_8_8.p2+off2, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         } 
+        inline __attribute__((always_inline))
         void fsqrt(Reg instruction,uint32_t off1,uint32_t off2){
             Reg result;
             result.fdata = sqrtf(get_reg(instruction.bits_8_8_8.p1+off1).fdata);
             set_reg(instruction.bits_8_8_8.p2+off2,result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void dump_reg(Reg instruction , uint32_t off1){
             uint32_t addr = instruction.bits_8_16.p1+off1;
             cout << "reg " << addr << " has " << get_reg(addr).reg.data << endl;
             //Util::dump_reg_data(get_reg(instruction.bits_8_16.p1+off1),instruction.bits_8_16.p1+off1);
         }
+        inline __attribute__((always_inline))
         void dump_sf(Reg instruction){   
             uint32_t addr = instruction.bits_8_16.p1;
             cout << "sf " << addr << " has " << get_sf(addr).reg.data << endl;
             //Util::dump_reg_data(get_sf(instruction.bits_8_16.p1),instruction.bits_8_16.p1);
         }
+        inline __attribute__((always_inline))
         void dump_cache(Reg instruction , uint32_t off1){
             uint32_t addr = instruction.bits_8_16.p1+off1;
             cout << "cache " << addr << " has " << get_cash(addr).reg.data << endl;
             //Util::dump_reg_data(get_cash(instruction.bits_8_16.p1+off1),instruction.bits_8_16.p1+off1);
         }
+        inline __attribute__((always_inline))
         void dump_stack(Reg instruction,uint32_t off1){
             uint32_t addr = instruction.bits_8_16.p1+off1;
             cout << "stack " << addr << " has " << get_stack(addr).reg.data << endl;
             //Util::dump_reg_data(get_stack(instruction.bits_8_16.p1+off1),instruction.bits_8_16.p1+off1);
         }
+        inline __attribute__((always_inline))
         void int_sqrt(Reg instruction,uint32_t off1,uint32_t off2){
             set_reg(instruction.bits_8_8_8.p2+off2,(uint32_t)sqrt(get_reg(instruction.bits_8_8_8.p1+off1).fdata));
         }
+        inline __attribute__((always_inline))
         void FMOD(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.FMOD(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
             set_sf(sf_map::alu_flags,alu.alu_flags);
         }
+        inline __attribute__((always_inline))
         void WFE(Reg instruction){
             execute = &Core::execute_wfe;
             core_vars.wating_on_event = true;
             core_vars.event_wating_on = instruction.bits_16_8.p1;
         }
+        inline __attribute__((always_inline))
         void WFE_ptr(Reg instruction,uint32_t off1){
             execute = &Core::execute_wfe;
             core_vars.wating_on_event = true;
             core_vars.event_wating_on = get_reg(instruction.bits_8_16.p1+off1).data;
         }
+        inline __attribute__((always_inline))
         void offset_to_block(Reg instruction,uint32_t off1){
             for(int i = 0 ; i < 2 ; i++){
                 set_reg(instruction.bits_16_8.p1+i+off1,get_sf(sf_map::offset0+i));
             }
             set_reg(instruction.bits_16_8.p1+3+off1,get_sf(sf_map::sc_offset));
         }
+        inline __attribute__((always_inline))
         void jmpb(Reg instruction,uint32_t off1){
             if(get_reg(instruction.bits_8_16.p1+off1).reg.data){
                 set_sf(sf_map::clk, instruction.bits_8_16.p2);
             }
         }
+        inline __attribute__((always_inline))
         void jmpb_ptr(Reg instruction,uint32_t off1){
             if(get_reg(instruction.bits_8_8_8.p1+off1).reg.data){
                 set_sf(sf_map::clk, get_reg(instruction.bits_8_8_8.p2+off1).reg.data);
             }
         }
+        inline __attribute__((always_inline))
         void NULL_137(Reg instruction){}
+        inline __attribute__((always_inline))
         void NULL_138(Reg instruction){}
+        inline __attribute__((always_inline))
         void NULL_139(Reg instruction){}
+        inline __attribute__((always_inline))
         void NULL_140(Reg instruction){}
+        inline __attribute__((always_inline))
         void wfews(Reg instruction){
             execute = &Core::execute_WFEWS;
             core_vars.wating_for_external_write = true;
             core_vars.last_external_write_to_stack_target = instruction.bits_8_16.p1;
         }
+        inline __attribute__((always_inline))
         void send_pf(Reg instruction){
 
         }
+        inline __attribute__((always_inline))
         void set_pf_out(Reg instruction){
 
         }
+        inline __attribute__((always_inline))
         void send_pf_ptr(Reg instruction){
 
         }
+        inline __attribute__((always_inline))
         void cmp_reg(Reg instruction,uint32_t off1){
             Reg result = alu.cmp_reg(get_reg(instruction.bits_8_8_8.p1+off1), instruction.bits_8_8_8.p2, instruction.bits_8_8_8.p3);
             set_sf(sf_map::do_jmp, result);
         }
+        inline __attribute__((always_inline))
         void ccpus(Reg instruction){
 
         }
+        inline __attribute__((always_inline))
         void split_byte(Reg instruction,uint32_t off2,uint32_t off3){
             switch(instruction.bits_8_8_8.p1 % 4){
                 case 0:
@@ -1312,22 +1494,27 @@ class Core {
                 default:break;
             }
         }
+        inline __attribute__((always_inline))
         void shift_l(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.shiftl(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
         }
+        inline __attribute__((always_inline))
         void shift_l_abs(Reg instruction,uint32_t off1,uint32_t off3){
             Reg result = alu.shiftl_abs(get_reg(instruction.bits_8_8_8.p1+off1), instruction.bits_8_8_8.p2);
             set_reg(instruction.bits_8_8_8.p3+off3, result);
         }
+        inline __attribute__((always_inline))
         void shift32_l(Reg instruction,uint32_t off1,uint32_t off2,uint32_t off3){
             Reg result = alu.shift32l(get_reg(instruction.bits_8_8_8.p1+off1), get_reg(instruction.bits_8_8_8.p2+off2));
             set_reg(instruction.bits_8_8_8.p3+off3, result);
         }
+        inline __attribute__((always_inline))
         void shift32_l_abs(Reg instruction,uint32_t off1,uint32_t off3){
             Reg result = alu.shift32l_abs(get_reg(instruction.bits_8_8_8.p1+off1), instruction.bits_8_8_8.p2);
             set_reg(instruction.bits_8_8_8.p3+off3, result);
         }
+        inline __attribute__((always_inline))
         void shut_down(Reg instruction){
             Util::cpu_on = false;
             for(int i = 0 ; i < CORE_COUNT ; i++){
@@ -1335,9 +1522,10 @@ class Core {
             }
         }
         
+        
         // i was working on filling in instructions =======================================================================
     private:
-
+    inline __attribute__((always_inline))
     void init_sf_stats(uint32_t core_id){
         set_sf(sf_map::active,1);
         set_sf(sf_map::core_id, core_id);
@@ -1348,67 +1536,68 @@ class Core {
         set_sf(sf_map::call_stack_depth, CALL_STACK_SIZE); // to be updated by main controller
     }
     public:
-    inline
+    
+    inline __attribute__((always_inline))
     void append_call_stack(uint32_t addr){
         mem->call_stack.push_back({addr});
     }
-    inline
+    inline __attribute__((always_inline))
     Reg pop_call_stack(){
         Reg addr = mem->call_stack.back();
         mem->call_stack.pop_back();
         return addr;
     } 
-    inline 
+    inline __attribute__((always_inline)) 
     Reg get_reg(uint32_t addr){
         if(addr > REG_SIZE){
             addr = REG_SIZE-1;
         }
         return mem->regs[addr];
     }
-    inline 
+    inline __attribute__((always_inline))
     void set_reg(uint32_t addr, Reg value){mem->regs[addr] = value;}
-    inline
+    inline __attribute__((always_inline))
     void set_reg(uint32_t addr, uint32_t value){
         Reg reg_value;
         reg_value.data = value;
         mem->regs[addr] = reg_value;
     }
-    inline
+    inline __attribute__((always_inline))
     Reg get_sf(uint32_t addr){return mem->sf[addr];}
-    inline 
+    inline __attribute__((always_inline))
     void set_sf(uint32_t addr, Reg value){mem->sf[addr] = value;}
-    inline 
+    inline __attribute__((always_inline))
     void set_sf(uint32_t addr, uint32_t value){
         Reg reg_value;
         reg_value.data = value;
         mem->sf[addr] = reg_value;
     }
-    inline 
+    inline __attribute__((always_inline))
     Reg get_stack(uint32_t addr){return mem->stack[addr];}
-    inline 
+    inline __attribute__((always_inline))
     void set_stack(uint32_t addr, Reg value){mem->stack[addr] = value;}
-    inline 
+    inline __attribute__((always_inline))
     void set_stack(uint32_t addr , uint32_t value){
         Reg reg_value;
         reg_value.data = value;
         mem->stack[addr] = reg_value;
     }
-    inline 
+    inline __attribute__((always_inline))
     Reg get_cash(uint32_t addr){return (*mem->cache)[addr];}
-    inline 
+    inline __attribute__((always_inline))
     void set_cash(uint32_t addr, Reg value){(*mem->cache)[addr] = value;}
-    inline 
+    inline __attribute__((always_inline))
     void set_cash(uint32_t addr, uint32_t value){
         Reg reg_value;
         reg_value.data = value;
         (*mem->cache)[addr] = reg_value;
     }
-    inline void external_write_stack(uint32_t addr , Reg value){
+    inline __attribute__((always_inline)) void external_write_stack(uint32_t addr , Reg value){
         mem->stack[addr] = value;
         set_sf(sf_map::lpwt,addr);
 
     }
-    inline void external_write_stack(uint32_t addr , uint32_t value){
+    inline __attribute__((always_inline)) void external_write_stack(uint32_t addr , uint32_t value){
 
     }
 
