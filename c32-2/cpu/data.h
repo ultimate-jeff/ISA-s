@@ -63,8 +63,8 @@ enum sf_map{
     call_stack_ptr = 18,
     port_core_id = 19,
     ra = 20,
-    cache_claim_id = 21,
-    ports_claim_id = 22,
+    event_target = 21,
+    wating_on = 22,
     // 23-30 reserved
     core_id = 31,
     reg_size = 32,

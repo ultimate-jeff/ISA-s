@@ -21,7 +21,7 @@ constexpr uint16_t SF_MASK = SF_SIZE - 1;
 constexpr uint16_t PORT_MASK = PORT_SIZE - 1;
 
 const Reg nullreg = {0};
-const Reg error_reg{.reg = {.flags = (1u << 6)}};
+const Reg error_reg;
 
 
 // note all MU sizes must be powers of 2.

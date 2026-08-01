@@ -14,6 +14,7 @@ uint32_t rand32(uint32_t rand_state){
     rand_state ^= rand_state << 5;
     return rand_state;
 }
+
 inline __attribute__((always_inline))
 void stall_30() {
     asm volatile (
