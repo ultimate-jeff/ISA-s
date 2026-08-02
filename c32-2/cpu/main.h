@@ -8,7 +8,6 @@
 #include "config.h"
 #include <array>
 #include <bit>
-#include <cmath>
 #include <functional>
 
 using namespace std;
@@ -40,7 +39,7 @@ class ALU{
         return (uint8_t)(
             (1u) | //true
             ((result == 0) << 1) | // zero
-            (std::isinf(result) << 3) | // carry
+            (isinf(result) << 3) | // carry
             ((result < 0) << 4) | // sign
             ((__builtin_parity((uint32_t)result & UINT32_MAX)) << 5) | 
             (0u << 6 ) | // error -- 64
@@ -770,17 +769,17 @@ private: // instructions
         }
     }
     void WFE(Reg& instruction){
-        set_sf(sf_map::wating_on,true);
-        set_sf(sf_map::event_target, instruction.bits_16_8.p1);
+        wf_flags.wf_event = true;
+        wf_flags.event_target = instruction.bits_16_8.p1;
         exacute_ptr = WF_exacute;
     }
     void WFE_ptr(Reg& instruction){
-        set_sf(sf_map::wating_on,true);
-        set_sf(sf_map::event_target, get_stack(instruction.bits_8_16.p1).reg.data);
+        wf_flags.wf_event = true;
+        wf_flags.event_target = get_stack(instruction.bits_8_16.p1).reg.data;
         exacute_ptr = WF_exacute;
     }
     void WFI(Reg& instruction){
-        set_sf(sf_map::wating_on,true);
+        wf_flags.wf_intrp = true;
         exacute_ptr = WF_exacute;
     }
     void syscall(Reg& instruction){
@@ -968,195 +967,6 @@ private: // instructions
     void wf_SC_intrp(Reg& instruction){
         exacute_ptr = WF_exacute;
         set_sf(sf_map::wating_on,true);
-    }
-    void push_port(Reg& instruction){
-        set_port(
-            instruction.bits_8_8_8.p2,
-            get_stack(instruction.bits_8_8_8.p1)
-        );
-    }
-    void pull_port(Reg& instruction){ 
-        set_stack(
-            instruction.bits_8_8_8.p2,
-            get_port(instruction.bits_8_8_8.p1)
-        );
-    }
-    void ATP(Reg& instruction){
-        Reg value = get_reg(instruction.bits_16_8.p1);
-        set_port(instruction.bits_16_8.p2,value);
-    }
-    void PTA(Reg& instruction){
-        Reg value = get_port(instruction.bits_8_16.p1);
-        set_reg(instruction.bits_8_16.p2,value);
-    }
-    void LP(Reg& instruction){
-        Reg value;
-        value.reg.data = instruction.bits_8_16.p2;
-        set_port(
-            instruction.bits_8_16.p1,
-            value
-        );
-    }
-    void NOT(Reg& instruction){
-        set_stack(
-            instruction.bits_8_8_8.p2,
-            alu.NOT(
-                get_stack(instruction.bits_8_8_8.p1)
-            )
-        );
-    }
-    void push_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
-        Reg value = get_reg(get_stack(instruction.bits_8_8_8.p2).reg.data);
-        target->set_reg(
-            get_stack(instruction.bits_8_8_8.p3).reg.data,
-            value
-        );
-    }
-    void pull_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
-        Reg value = target->get_reg(get_stack(instruction.bits_8_8_8.p2).reg.data);
-        set_reg(
-            get_stack(instruction.bits_8_8_8.p3).reg.data,
-            value
-        );
-    }
-    void ROLL_L(Reg& instruction){
-        set_stack(
-            instruction.bits_8_8_8.p3,
-            alu.ROL_L(
-                get_stack(instruction.bits_8_8_8.p1),
-                get_stack(instruction.bits_8_8_8.p2)
-            )
-        );
-    }
-    void ROLL_R(Reg& instruction){
-        set_stack(
-            instruction.bits_8_8_8.p3,
-            alu.ROL_R(
-                get_stack(instruction.bits_8_8_8.p1),
-                get_stack(instruction.bits_8_8_8.p2)
-            )
-        );
-    }
-    void stall_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
-        Reg fake_instruction;
-        fake_instruction.bits_8_8_8.p1 = instruction.bits_8_8_8.p2;
-        target->STALL(fake_instruction);
-    }
-    void core_wfintrp(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_16.p1);
-        target->WFI(instruction);
-    }
-    void core_wfevent(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_16.p1);
-        Reg fake_instruction;
-        fake_instruction.bits_16_8.p1 = instruction.bits_8_16.p2;
-        target->WFE(fake_instruction);
-    }
-    void disable_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
-        target->set_sf(sf_map::active,0);
-    }
-    void enable_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
-        target->set_sf(sf_map::active,1);
-    }
-    void claim_cache(Reg& instruction){
-        Reg claim;
-        claim.reg.data = get_sf(sf_map::core_id).reg.data;
-        claim.reg.meta_data = 1;
-        set_cache(0,claim);
-    }
-    void release_cache(Reg& instruction){
-        Reg claim;
-        claim.reg.data = get_sf(sf_map::core_id).reg.data;
-        claim.reg.meta_data = 0;
-        set_cache(0,claim);
-    }
-    void claim_port(Reg& instruction){
-        Reg claim;
-        claim.reg.data = get_sf(sf_map::core_id).reg.data;
-        claim.reg.meta_data = 1;
-        set_port(0,claim);
-    }
-    void release_port(Reg& instruction){
-        Reg claim;
-        claim.reg.data = get_sf(sf_map::core_id).reg.data;
-        claim.reg.meta_data = 0;
-        set_port(0,claim);
-    }
-    void GCL(Reg& instruction){
-        set_stack(instruction.bits_8_16.p1,get_cache(0));
-    }
-    void GPL(Reg& instruction){
-        set_stack(instruction.bits_8_16.p1,get_port(0));
-    }
-    void force_set_flags(Reg& instruction){
-        Reg value = get_stack(instruction.bits_8_8_8.p1);
-        value.reg.flags = instruction.bits_8_8_8.p2;
-        set_stack(instruction.bits_8_8_8.p1,value);
-    }
-    void load_metadata(Reg& instruction){
-        Reg value = get_stack(instruction.bits_8_8_8.p1);
-        value.reg.meta_data = instruction.bits_8_8_8.p2;
-        set_stack(instruction.bits_8_8_8.p1,value);
-    }
-    void swarm_cache(Reg& instruction){
-        Reg data = get_stack(instruction.bits_8_8_8.p1);
-        uint32_t start = instruction.bits_8_8_8.p2;
-        uint32_t end = instruction.bits_8_8_8.p3;
-        for(uint32_t i = start ; i < end ; i++){
-            set_cache(i,data);
-        }
-    }
-    void swarm_ports(Reg& instruction){
-        Reg data = get_stack(instruction.bits_8_8_8.p1);
-        uint32_t start = instruction.bits_8_8_8.p2;
-        uint32_t end = instruction.bits_8_8_8.p3;
-        for(uint32_t i = start ; i < end ; i++){
-            set_port(i,data);
-        }
-    }
-    void swarm_stack(Reg& instruction){
-        Reg data = get_stack(instruction.bits_8_8_8.p1);
-        uint32_t start = instruction.bits_8_8_8.p2;
-        uint32_t end = instruction.bits_8_8_8.p3;
-        for(uint32_t i = start ; i < end ; i++){
-            set_stack(i,data);
-        }
-    }
-    void ld_ptr_mem(Reg& instruction){
-        Reg addr = get_stack(instruction.bits_8_8_8.p1);
-        set_stack(
-            instruction.bits_8_8_8.p2,
-            get_reg(addr.reg.data)
-        );
-    }
-    void ld_ptr_cache(Reg& instruction){
-        Reg addr = get_stack(instruction.bits_8_8_8.p1);
-        set_stack(
-            instruction.bits_8_8_8.p2,
-            get_cache(addr.reg.data)
-        );
-    }
-    void ld_ptr_port(Reg& instruction){
-        Reg addr = get_stack(instruction.bits_8_8_8.p1);
-        set_stack(
-            instruction.bits_8_8_8.p2,
-            get_port(addr.reg.data)
-        );
-    }
-    void push_core_stack(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
-        Reg value = get_stack(instruction.bits_8_8_8.p2);
-        target->append_call_stack(value);
-    }
-    void pull_core_stack(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
-        Reg value = target->get_top_call_stack();
-        set_stack(instruction.bits_8_8_8.p2,value);
     }
 
     void GCL(Reg& instruction){
@@ -1398,9 +1208,7 @@ private:
         if(intrp_avalable()){
             set_sf(sf_map::intrp_ptr,0);
             _intrp(get_sf(sf_map::intrp_ptr).reg.data);
-            return;
         }
-        return;
     }
 
 private:
@@ -1412,8 +1220,6 @@ private:
     }
     void EXACUTE(){
         handle_intrps();
-        Reg instruction = get_reg(get_sf(sf_map::clk).reg.data);
-        (this->*opcode_table[instruction.bits_8_8_8.p1])(instruction);
     }
     void EXACUTE_WFE(){
         Reg event = get_sf(sf_map::event);
@@ -1537,28 +1343,28 @@ private:
         &Core::LD_PTR,       // 99 ld_ptr
         &Core::push_cs,      // 100 push_cs
         &Core::pull_cs,      // 101 pull_cs 
-        &Core::sc_intrp,     // 102 sc_intrp 
-        &Core::wf_SC_intrp,  // 103 wf_SC_intrp 
-        &Core::push_port,    // 104 push_port 
-        &Core::pull_port,    // 105 pull_port 
-        &Core::ATP,          // 106 atp 
-        &Core::PTA,          // 107 pta
-        &Core::LP,           // 108 lp
-        &Core::NOT,          // 109 NOT 
-        &Core::push_core,    // 110 push_core 
-        &Core::pull_core,    // 111 pull_core
-        &Core::stall_core,   // 112 stall_core
-        &Core::ROLL_L,       // 113
-        &Core::ROLL_R,       // 114
-        &Core::core_wfintrp, // 115 core_wfintp
-        &Core::core_wfevent, // 116 core_wfevent
-        &Core::disable_core, // 117 disable_core
-        &Core::enable_core,  // 118 enable_core
+        &Core::sc_intrp,     // 102 sc_intrp -- not implemented yet
+        &Core::wf_SC_intrp,  // 103 wf_SC_intrp -- not implemented yet
+        &Core::push_port,    // 104 push_port -- not implemented yet
+        &Core::pull_port,    // 105 pull_port -- not implemented yet
+        nullptr,             // 106 atp -- not implemented yet
+        nullptr,             // 107 pta -- not implemented yet
+        nullptr,             // 108 lp -- not implemented yet
+        nullptr,             // 109 NOT -- not implemented yet (ALU has NOT, Core wrapper missing)
+        nullptr,             // 110 push_core -- not implemented yet
+        nullptr,             // 111 pull_core -- not implemented yet
+        nullptr,             // 112 stall_core -- not implemented yet
+        nullptr,             // 113
+        nullptr,             // 114
+        nullptr,             // 115 core_wfintp
+        nullptr,             // 116 core_wfevent
+        nullptr,             // 117 disable_core
+        nullptr,             // 118 enable_core
         &Core::dump_ports,   // 119 (dup of 97 in your doc)
-        &Core::claim_cache,  // 120 claim_cache
-        &Core::release_cache,// 121 relese_cache
-        &Core::claim_port,  // 122 claim_ports
-        &Core::release_port,// 123 relese_ports
+        nullptr,             // 120 claim_cache
+        nullptr,             // 121 relese_cache
+        nullptr,             // 122 claim_ports
+        nullptr,             // 123 relese_ports
         &Core::GCL,          // 124
         &Core::GPL,          // 125
         &Core::force_set_flags, // 126
@@ -1567,18 +1373,11 @@ private:
         &Core::roll_Rabs,    // 129 roll_R_abs
         &Core::cmp_eval_bool,// 130
         &Core::RAND,         // 131
-        &Core::swarm_stack,  // 132
+        &Core::swarm_mem,    // 132
         &Core::GCSI,         // 133
-        &Core::swarm_mem,    // 134 swarm_mem (2nd variant, ptr version) -- name collision, needs distinct name
-        &Core::LM, 
-        &Core::swarm_cache,
-        &Core::swarm_ports,
-        &Core::ld_ptr_mem,
-        &Core::ld_ptr_cache,
-        &Core::ld_ptr_port,
-        &Core::push_core_stack,
-        &Core::pull_core_stack,
-        // x-255: unused / reserved in your doc
+        nullptr,             // 134 swarm_mem (2nd variant, ptr version) -- name collision, needs distinct name
+        &Core::LM,           // 135
+        // 136-255: unused / reserved in your doc
     };
 
 public:
