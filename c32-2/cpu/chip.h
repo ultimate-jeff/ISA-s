@@ -28,6 +28,7 @@ class ALU{
     public:
     ALU(){
 
+        
     }
     private:
     inline __attribute__((always_inline))
