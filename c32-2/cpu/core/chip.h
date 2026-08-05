@@ -1,26 +1,6 @@
-
-
-#include <iostream>
-#include <vector>
-#include <cstdint>
-#include "cpu_utils.h"
-#include "data.h"
-#include "config.h"
-#include <array>
-#include <bit>
-#include <cmath>
-#include <functional>
-
-using namespace std;
-
-struct alignas(64) Memory_unit {
-    array<Reg, REG_SIZE> regs;
-    array<Reg, STACK_SIZE> stack;
-    array<Reg, SF_SIZE> sf;
-    array<Reg, CACHE_SIZE>* cache = nullptr;
-    array<Reg, PORT_SIZE>* ports = nullptr;
-    array<Reg, CALL_STACK_DEPTH> call_stack;
-};
+//#include "interface.h"
+#include "includes.h"
+//#include "data.h"
 
 
 class ALU{
@@ -288,11 +268,14 @@ class ALU{
 
 };
 
-class Core{
+class Core : public Device{
 public:
     ALU alu;
-    Memory_unit mem;
-    array<Core*, CORE_COUNT> cores = {nullptr};
+    //Memory_unit mem;
+    bool brantched = false;
+    //array<Device*, AVAILABLE_CIDS> cores = {nullptr};
+
+
 
 private: // instructions
     void HALT(Reg& instruction){
@@ -388,7 +371,7 @@ private: // instructions
             get_sf(instruction.bits_8_8_8.p1)
         );
     }
-    void set_sf(Reg& instruction){
+    void instr_set_sf(Reg& instruction){
         set_sf(
             instruction.bits_8_16.p1,
             instruction.bits_8_16.p2
@@ -537,26 +520,32 @@ private: // instructions
         RET(instruction);
     }
     void INTRP(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_16.p1);
+        Core* target = get_core(instruction.bits_8_16.p1,true);
+        if(target == nullptr){
+            return;
+        }
         if(target->get_sf(sf_map::interuptable).reg.data){
             target->_call(instruction.bits_8_16.p2);
         }
     }
     void INTRP_ptr(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_16.p1);
+        Core* target = get_core(instruction.bits_8_16.p1,true);
+        if(target == nullptr){
+            return;
+        }
         if(target->get_sf(sf_map::interuptable).reg.data){
             target->_call(get_stack(instruction.bits_8_16.p2).reg.data);
         }
     }
     void push_sf_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
         target->set_sf(
             instruction.bits_8_8_8.p2,
             get_stack(instruction.bits_8_8_8.p3)
         );
     }
     void pull_sf_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
         set_stack(
             instruction.bits_8_8_8.p3,
             target->get_sf(instruction.bits_8_8_8.p2)
@@ -599,13 +588,13 @@ private: // instructions
     void one_count(Reg& instruction){
         set_stack(
             instruction.bits_8_8_8.p2,
-            __popcount(get_stack(instruction.bits_8_8_8.p1).data)
+            std::__popcount(get_stack(instruction.bits_8_8_8.p1).data)
         );
     }
     void zero_count(Reg& instruction){
         set_stack(
             instruction.bits_8_8_8.p2,
-            32 - __popcount(get_stack(instruction.bits_8_8_8.p1).data)
+            32 - std::__popcount(get_stack(instruction.bits_8_8_8.p1).data)
         );
     }
     void ADD(Reg& instruction){
@@ -961,7 +950,10 @@ private: // instructions
         );
     }
     void sc_intrp(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
+        if(target == nullptr){
+            return;
+        }
         target->_intrp(
             instruction.bits_8_8_8.p2 + target->get_sf(sf_map::sc_offset).reg.data
         );
@@ -1007,7 +999,10 @@ private: // instructions
         );
     }
     void push_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
+        if(target == nullptr){
+            return;
+        }
         Reg value = get_reg(get_stack(instruction.bits_8_8_8.p2).reg.data);
         target->set_reg(
             get_stack(instruction.bits_8_8_8.p3).reg.data,
@@ -1015,7 +1010,10 @@ private: // instructions
         );
     }
     void pull_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
+        if(target == nullptr){
+            return;
+        }
         Reg value = target->get_reg(get_stack(instruction.bits_8_8_8.p2).reg.data);
         set_reg(
             get_stack(instruction.bits_8_8_8.p3).reg.data,
@@ -1041,27 +1039,29 @@ private: // instructions
         );
     }
     void stall_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
         Reg fake_instruction;
         fake_instruction.bits_8_8_8.p1 = instruction.bits_8_8_8.p2;
         target->STALL(fake_instruction);
     }
     void core_wfintrp(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_16.p1);
+        Core* target = get_core(instruction.bits_8_16.p1,true);
+
         target->WFI(instruction);
     }
     void core_wfevent(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_16.p1);
+        Core* target = get_core(instruction.bits_8_16.p1,true);
+
         Reg fake_instruction;
         fake_instruction.bits_16_8.p1 = instruction.bits_8_16.p2;
         target->WFE(fake_instruction);
     }
     void disable_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
         target->set_sf(sf_map::active,0);
     }
     void enable_core(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
         target->set_sf(sf_map::active,1);
     }
     void claim_cache(Reg& instruction){
@@ -1099,33 +1099,12 @@ private: // instructions
         value.reg.flags = instruction.bits_8_8_8.p2;
         set_stack(instruction.bits_8_8_8.p1,value);
     }
-    void load_metadata(Reg& instruction){
-        Reg value = get_stack(instruction.bits_8_8_8.p1);
-        value.reg.meta_data = instruction.bits_8_8_8.p2;
-        set_stack(instruction.bits_8_8_8.p1,value);
-    }
-    void swarm_cache(Reg& instruction){
-        Reg data = get_stack(instruction.bits_8_8_8.p1);
-        uint32_t start = instruction.bits_8_8_8.p2;
-        uint32_t end = instruction.bits_8_8_8.p3;
-        for(uint32_t i = start ; i < end ; i++){
-            set_cache(i,data);
-        }
-    }
     void swarm_ports(Reg& instruction){
         Reg data = get_stack(instruction.bits_8_8_8.p1);
         uint32_t start = instruction.bits_8_8_8.p2;
         uint32_t end = instruction.bits_8_8_8.p3;
         for(uint32_t i = start ; i < end ; i++){
             set_port(i,data);
-        }
-    }
-    void swarm_stack(Reg& instruction){
-        Reg data = get_stack(instruction.bits_8_8_8.p1);
-        uint32_t start = instruction.bits_8_8_8.p2;
-        uint32_t end = instruction.bits_8_8_8.p3;
-        for(uint32_t i = start ; i < end ; i++){
-            set_stack(i,data);
         }
     }
     void ld_ptr_mem(Reg& instruction){
@@ -1150,28 +1129,20 @@ private: // instructions
         );
     }
     void push_core_stack(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
+        if(target == nullptr){
+            return;
+        }
         Reg value = get_stack(instruction.bits_8_8_8.p2);
         target->append_call_stack(value);
     }
     void pull_core_stack(Reg& instruction){
-        Core *target = get_core(instruction.bits_8_8_8.p1);
+        Core* target = get_core(instruction.bits_8_8_8.p1,true);
+        if(target == nullptr){
+            return;
+        }
         Reg value = target->get_top_call_stack();
         set_stack(instruction.bits_8_8_8.p2,value);
-    }
-
-    void GCL(Reg& instruction){
-        Reg value = get_cache(0);
-        set_stack(instruction.bits_8_16.p1,value);
-    }
-    void GPL(Reg& instruction){
-        Reg value = get_port(0);
-        set_stack(instruction.bits_8_16.p1,value);
-    }
-    void force_set_flags(Reg& instruction){
-        Reg value = get_stack(instruction.bits_8_8_8.p1);
-        value.reg.flags = instruction.bits_8_8_8.p2;
-        set_stack(instruction.bits_8_8_8.p1,value);
     }
     void load_metadata(Reg& instruction){
         Reg value = get_stack(instruction.bits_8_8_8.p1);
@@ -1244,166 +1215,7 @@ private: // instructions
             set_cache(i,data);
         }
     }
-    void swarm_ports(Reg& instruction){
-        Reg data = get_stack(instruction.bits_8_8_8.p1);
-        uint32_t start = instruction.bits_8_8_8.p2;
-        uint32_t end = instruction.bits_8_8_8.p3;
-        for(uint32_t i = start ; i < end ; i++){
-            set_port(i,data);
-        }
-    }
     
-
-
-public:
-    inline __attribute__((always_inline))
-    void _call(uint16_t addr){
-        append_call_stack(get_sf(sf_map::clk));
-        set_sf(sf_map::clk,addr);
-    }
-    inline __attribute__((always_inline))
-    void _intrp(uint16_t addr){
-        if(get_sf(sf_map::interuptable).reg.data){
-            set_sf(sf_map::intrp_ptr, addr);
-        }
-    }
-
-private: // utils
-    inline __attribute__((always_inline))
-    void append_call_stack(Reg data){
-        inc_cs_ptr();
-        set_call_stack(
-            get_sf(sf_map::call_stack_ptr).reg.data,
-            data
-        );
-    }
-    inline __attribute__((always_inline))
-    void dec_cs_ptr(){
-        set_sf(
-            sf_map::call_stack_ptr,
-            get_sf(sf_map::call_stack_ptr).reg.data - 1
-        );
-    }
-    inline __attribute__((always_inline))
-    void inc_cs_ptr(){
-        set_sf(
-            sf_map::call_stack_ptr,
-            get_sf(sf_map::call_stack_ptr).reg.data + 1
-        );
-    }
-    inline __attribute__((always_inline))
-    Reg get_top_call_stack(){
-        return get_call_stack(get_sf(sf_map::call_stack_ptr).reg.data);
-    }
-
-private: // getters
-    inline __attribute__((always_inline))
-    Reg get_reg(uint16_t addr){
-        return mem.regs[addr & REG_MASK];
-    }
-    inline __attribute__((always_inline))
-    Reg get_stack(uint16_t addr){
-        return mem.stack[addr & STACK_MASK];
-    }
-    inline __attribute__((always_inline))
-    Reg get_sf(uint16_t addr){
-        return mem.sf[addr & SF_MASK];
-    }
-    inline __attribute__((always_inline))
-    Reg get_call_stack(uint16_t addr){
-        return mem.call_stack[addr & CALL_STACK_MASK];
-    }
-    inline __attribute__((always_inline))
-    Reg get_cache(uint16_t addr){
-        Reg result;
-        Reg lock_data = (*mem.cache)[0];
-        if(lock_data.reg.meta_data == 0 && lock_data.reg.data == get_sf(sf_map::core_id).reg.data){
-            result = (*mem.cache)[addr & CACHE_MASK];
-        }else{
-            result = error_reg; // set error flag
-        }
-        return result;
-    }
-    inline __attribute__((always_inline))
-    Reg get_port(uint16_t addr){
-        Reg result;
-        Reg lock_data = (*mem.ports)[0];
-        if(lock_data.reg.meta_data == 0 && lock_data.reg.data == get_sf(sf_map::core_id).reg.data){
-            result = (*mem.ports)[addr & PORT_MASK];
-        }else{
-            result = error_reg; // set error flag
-        }
-        return result;
-    }
-    inline __attribute__((always_inline))
-    Core *get_core(uint16_t addr){
-        return cores[addr & CORE_MASK];
-    }
-private: // setters
-    inline __attribute__((always_inline))
-    void set_reg(uint16_t addr , Reg data){
-        mem.regs[addr & REG_MASK] = data;
-    }
-    inline __attribute__((always_inline))
-    void set_reg(uint16_t addr, uint32_t data){
-        mem.regs[addr & REG_MASK].data = data;
-    }
-    inline __attribute__((always_inline))
-    void set_stack(uint16_t addr , Reg data){
-        mem.stack[addr & STACK_MASK] = data;
-    }
-    inline __attribute__((always_inline))
-    void set_stack(uint16_t addr , uint32_t data){
-        mem.stack[addr & STACK_MASK].data = data;
-    }
-    inline __attribute__((always_inline))
-    void set_sf(uint16_t addr , Reg data){
-        mem.sf[addr & SF_MASK] = data;
-    }
-    inline __attribute__((always_inline))
-    void set_sf(uint16_t addr , uint32_t data){
-        mem.sf[addr & SF_MASK].data = data;
-    }
-    inline __attribute__((always_inline))
-    void set_call_stack(uint16_t addr , Reg data){
-        mem.call_stack[addr & CALL_STACK_MASK] = data;
-    }
-    inline __attribute__((always_inline))
-    void set_cache(uint16_t addr , Reg data){
-        Reg lock_data = (*mem.cache)[0];
-        if(lock_data.reg.meta_data == 0 || lock_data.reg.data == get_sf(sf_map::core_id).reg.data){
-            (*mem.cache)[addr & CACHE_MASK] = data;
-        }else{
-            // error
-            set_sf(sf_map::event,error_reg); // set error flag / ------------------------------------------------------ make shure you look at this to define an event table 
-        }
-    }
-    inline __attribute__((always_inline))
-    void set_port(uint16_t addr , Reg data){
-        Reg lock_data = (*mem.ports)[0];
-        if(lock_data.reg.meta_data == 0 || lock_data.reg.data == get_sf(sf_map::core_id).reg.data){
-            (*mem.ports)[addr & PORT_MASK] = data;
-        }else{
-            // error
-            set_sf(sf_map::event,error_reg); // set error flag / ------------------------------------------------------ make shure you look at this to define an event table 
-        }
-    }
-    
-private: 
-    inline __attribute__((always_inline))
-    bool intrp_avalable(){
-        return get_sf(sf_map::interuptable).reg.data && get_sf(sf_map::intrp_ptr).reg.data != 0;
-    }
-    inline __attribute__((always_inline))
-    void handle_intrps(){
-        if(intrp_avalable()){
-            set_sf(sf_map::intrp_ptr,0);
-            _intrp(get_sf(sf_map::intrp_ptr).reg.data);
-            return;
-        }
-        return;
-    }
-
 private:
     void null_exacute(){
         stall_30();
@@ -1451,7 +1263,7 @@ private:
         &Core::move_ptr,     // 12
         &Core::push_sf,      // 13
         &Core::pull_sf,      // 14
-        &Core::set_sf,       // 15
+        &Core::instr_set_sf, // 15
         &Core::swarm,        // 16
         &Core::LS,           // 17
         &Core::LC,           // 18
@@ -1584,7 +1396,9 @@ private:
 
 public:
     void (Core::*exacute_ptr)() = &Core::null_exacute;
-    Core(array<Reg, CACHE_SIZE>* cache_ptr, array<Reg, PORT_SIZE>* ports_ptr, array<Core*, CORE_COUNT> cores_ptr){
+
+    Core() = default;
+    Core(array<Reg, CACHE_SIZE>* cache_ptr, array<Reg, PORT_SIZE>* ports_ptr, array<Device*, AVAILABLE_CIDS> cores_ptr){
         mem.cache = cache_ptr;
         mem.ports = ports_ptr;
         cores = cores_ptr;
